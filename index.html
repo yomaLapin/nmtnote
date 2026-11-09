@@ -1,45 +1,36 @@
 <!DOCTYPE html>
-<html lang="ko">
-<head>
+<html lang="ko"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NMT Note</title>
     <!-- PWA 매니페스트 연결 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#333333">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Phosphor Icons (가볍고 깔끔한 아이콘) -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/thin/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/light/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
+    
+    <!-- Markdown 파싱 라이브러리 추가 -->
+    <script src="https://unpkg.com/marked/marked.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/turndown-plugin-gfm/dist/turndown-plugin-gfm.js" crossorigin="anonymous"></script>
+
+    <!-- 🌟 PDF 추출 라이브러리 추가 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
+
     <style>
         /* 커스텀 스크롤바 디자인 */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8; 
-        }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
         
-        /* 텍스트 영역 테두리 제거 및 클릭 시 아웃라인 제거 */
-        #editor:focus {
-            outline: none;
-            box-shadow: none;
-        }
+        #editor:focus { outline: none; box-shadow: none; }
+        input, select { font-size: 16px !important; }
 
-        /* 모바일에서 텍스트 에디터 자동 확대 방지 */
-        input, textarea {
-            font-size: 16px !important; 
-        }
-
-        /* 기본 다크(Dark) 테마 변수 (다크그레이 & 웜화이트) */
+        /* 테마 변수 */
         :root {
             --bg-color: #333333;
             --text-color: #F2F0E9;
@@ -51,79 +42,75 @@
             --icon-color: #bbbbbb;
         }
 
-        /* 라이트(Light) 테마 변수 (Tailwind 기본값과 유사하게 매핑) */
         body.light-theme {
             --bg-color: #ffffff;
-            --text-color: #1f2937; /* gray-800 */
-            --sidebar-bg: #f9fafb; /* gray-50 */
+            --text-color: #1f2937;
+            --sidebar-bg: #f9fafb;
             --header-bg: #ffffff;
-            --border-color: #e5e7eb; /* gray-200 */
-            --hover-bg: #f3f4f6; /* gray-100 */
+            --border-color: #e5e7eb;
+            --hover-bg: #f3f4f6;
             --input-bg: transparent;
-            --icon-color: #9ca3af; /* gray-400 */
+            --icon-color: #9ca3af;
         }
 
-        /* 테마 적용 클래스 */
         .theme-bg { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
         .theme-sidebar { background-color: var(--sidebar-bg); border-color: var(--border-color); }
         .theme-header { background-color: var(--header-bg); border-color: var(--border-color); }
         .theme-border { border-color: var(--border-color); }
         .theme-hover:hover { background-color: var(--hover-bg); }
         .theme-icon { color: var(--icon-color); }
-        
         .theme-input-container { background-color: var(--input-bg); border-color: var(--border-color); }
         
-        textarea#editor {
+        #editor {
             background-color: var(--bg-color);
             color: var(--text-color);
-        }
-        input#filenameInput {
-            color: var(--text-color);
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        /* 테마 변경 버튼 스타일 */
-        .theme-btn {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            box-sizing: border-box;
+        /* 🌟 글자 크기(Heading) 렌더링 스타일 지정 */
+        #editor h1 { font-size: 2.2em; font-weight: bold; margin-bottom: 0.5em; }
+        #editor h2 { font-size: 1.8em; font-weight: bold; margin-bottom: 0.5em; }
+        #editor h3 { font-size: 1.4em; font-weight: bold; margin-bottom: 0.5em; }
+        #editor p { font-size: 1em; margin: 0; min-height: 1.2em; }
+        #editor h5 { font-size: 0.85em; margin-bottom: 0.5em; }
+        #editor h6 { font-size: 0.7em; margin-bottom: 0.5em; opacity: 0.8; }
+
+        /* 편집기 내부의 표(Table) 스타일 */
+        #editor table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
         }
+        #editor th, #editor td {
+            border: 1px solid var(--text-color) !important;
+            padding: 8px 12px;
+            min-width: 60px;
+            min-height: 30px;
+        }
+        #editor th {
+            background-color: var(--hover-bg);
+            font-weight: bold;
+        }
+
+        input#filenameInput { color: var(--text-color); }
+
+        .theme-btn { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; box-sizing: border-box; }
         .theme-light-btn { background: #ffffff; border: 2px solid #000000; }
         .theme-dark-btn { background: #333333; border: 2px solid #ffffff; }
 
-        /* 사이드바 반응형 접힘/펼침 애니메이션 제어 */
-        #sidebar {
-            width: 256px;
-            transition: margin-left 0.3s ease, transform 0.3s ease;
-        }
-        
-        /* 모바일 환경 (기본: 숨김, mobile-open 클래스 추가 시: 우측으로 슬라이드 인) */
+        /* 사이드바 반응형 */
+        #sidebar { width: 256px; transition: margin-left 0.3s ease, transform 0.3s ease; }
         @media (max-width: 767px) {
-            #sidebar {
-                position: fixed;
-                z-index: 30;
-                transform: translateX(-100%);
-            }
-            #sidebar.mobile-open {
-                transform: translateX(0);
-            }
+            #sidebar { position: fixed; z-index: 30; transform: translateX(-100%); }
+            #sidebar.mobile-open { transform: translateX(0); }
         }
-
-        /* 데스크탑(가로) 환경 (기본: 열림, desktop-closed 클래스 추가 시: 좌측으로 밀어내기) */
         @media (min-width: 768px) {
-            #sidebar {
-                position: relative;
-                flex-shrink: 0;
-                margin-left: 0;
-            }
-            #sidebar.desktop-closed {
-                margin-left: -256px;
-            }
+            #sidebar { position: relative; flex-shrink: 0; margin-left: 0; }
+            #sidebar.desktop-closed { margin-left: -256px; }
         }
-
     </style>
-</head>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-0{left:0px}.top-0{top:0px}.top-full{top:100%}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-0\.5{margin-left:0.125rem;margin-right:0.125rem}.mx-4{margin-left:1rem;margin-right:1rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.ml-2{margin-left:0.5rem}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mt-1{margin-top:0.25rem}.mt-10{margin-top:2.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.hidden{display:none}.h-screen{height:100vh}.h-4{height:1rem}.h-full{height:100%}.min-h-0{min-height:0px}.w-full{width:100%}.w-32{width:8rem}.w-px{width:1px}.min-w-0{min-width:0px}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.scale-95{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-b-lg{border-bottom-right-radius:0.5rem;border-bottom-left-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-none{border-style:none}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-500{--tw-bg-opacity:1;background-color:rgb(107 114 128 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-opacity-50{--tw-bg-opacity:0.5}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.tracking-wide{letter-spacing:0.025em}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-current{color:currentColor}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.line-through{-webkit-text-decoration-line:line-through;text-decoration-line:line-through}.placeholder-gray-400::placeholder{--tw-placeholder-opacity:1;color:rgb(156 163 175 / var(--tw-placeholder-opacity, 1))}.opacity-0{opacity:0}.opacity-40{opacity:0.4}.opacity-50{opacity:0.5}.opacity-60{opacity:0.6}.opacity-70{opacity:0.7}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.focus-within\:border-blue-500:focus-within{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.focus-within\:ring-1:focus-within{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus-within\:ring-blue-500:focus-within{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}.hover\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:text-red-500:hover{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:opacity-100:hover{opacity:1}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 768px){.md\:hidden{display:none}.md\:flex-row{flex-direction:row}.md\:flex-nowrap{flex-wrap:nowrap}.md\:gap-2{gap:0.5rem}.md\:p-3{padding:0.75rem}.md\:p-6{padding:1.5rem}.md\:px-3{padding-left:0.75rem;padding-right:0.75rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:shadow-none{--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}}</style></head>
 <body class="theme-bg font-sans h-screen w-full overflow-hidden flex flex-col md:flex-row">
 
     <!-- 모바일 사이드바 배경 오버레이 -->
@@ -133,91 +120,123 @@
     <aside id="sidebar" class="theme-sidebar border-r h-full flex flex-col shadow-lg md:shadow-none">
         <div class="p-4 border-b theme-border flex justify-between items-center theme-header shrink-0">
             <h2 class="font-bold flex items-center gap-2">
-                <i class="ph ph-files text-xl theme-icon"></i>
-                Files
+                <i class="ph ph-files text-xl theme-icon"></i> Files
             </h2>
             <div class="flex items-center gap-3">
-                <!-- 테마 변경 버튼 2개 -->
                 <div class="flex gap-2">
                     <div class="theme-btn theme-light-btn" onclick="setTheme('light')" title="라이트 테마"></div>
                     <div class="theme-btn theme-dark-btn" onclick="setTheme('dark')" title="다크 테마"></div>
                 </div>
-                <!-- 닫기 버튼 -->
-                <button class="text-current opacity-70 hover:opacity-100 p-1" onclick="toggleSidebar()" title="사이드바 닫기">
-                    <i class="ph ph-x text-xl"></i>
-                </button>
+                <button class="text-current opacity-70 hover:opacity-100 p-1" onclick="toggleSidebar()"><i class="ph ph-x text-xl"></i></button>
             </div>
         </div>
         
-        <!-- PWA 강제 설치 버튼 -->
         <div class="p-2 border-b theme-border shrink-0">
             <button id="installBtn" class="w-full hidden p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-bold transition-colors">
                 <i class="ph ph-download-simple mr-1"></i> 앱 설치하기 (PWA)
             </button>
         </div>
 
-        <!-- 파일 리스트 -->
-        <div id="fileList" class="flex-1 overflow-y-auto p-2">
-            <!-- 자바스크립트로 파일 목록이 렌더링 됩니다 -->
-        </div>
+        <div id="fileList" class="flex-1 overflow-y-auto p-2"><div class="text-center opacity-60 text-sm mt-10"><i class="ph ph-folder-open text-4xl mb-2"></i><br>저장된 파일이 없습니다.</div></div>
 
-        <!-- 버전 및 제작자 표기 -->
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-001)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-010)</span>
         </div>
     </aside>
 
     <!-- 메인 에디터 영역 -->
     <main class="flex-1 h-full flex flex-col min-w-0 relative z-10 theme-bg transition-all duration-300">
         
-        <!-- 툴바 (헤더) -->
-        <header class="sticky top-0 z-20 w-full flex items-center justify-between p-2 md:p-3 border-b theme-border theme-header shadow-sm shrink-0">
-            <div class="flex items-center gap-2 flex-1 min-w-0">
-                <button class="p-2 theme-icon theme-hover rounded-md transition-colors" onclick="toggleSidebar()" title="메뉴 열기/닫기">
-                    <i class="ph ph-list text-2xl"></i>
-                </button>
-                
-                <div class="flex items-center flex-1 max-w-sm border rounded-md px-3 py-1.5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all theme-input-container">
-                    <i class="ph ph-file-text theme-icon mr-2"></i>
-                    <input type="text" id="filenameInput" placeholder="untitled.txt" class="w-full bg-transparent border-none focus:outline-none text-sm md:text-base font-medium placeholder-gray-400" autocomplete="off">
+        <!-- 툴바 (헤더 2단 구조) -->
+        <header class="sticky top-0 z-20 w-full flex flex-col border-b theme-border theme-header shadow-sm shrink-0">
+            <!-- 1단: 파일명 및 저장/불러오기 버튼 -->
+            <div class="flex items-center justify-between p-2 md:p-3">
+                <div class="flex items-center gap-2 flex-1 min-w-0">
+                    <button class="p-2 theme-icon theme-hover rounded-md transition-colors" onclick="toggleSidebar()">
+                        <i class="ph ph-list text-2xl"></i>
+                    </button>
+                    <div class="flex items-center flex-1 max-w-sm border rounded-md px-3 py-1.5 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all theme-input-container">
+                        <i class="ph ph-file-text theme-icon mr-2"></i>
+                        <input type="text" id="filenameInput" placeholder="untitled.txt" class="w-full bg-transparent border-none focus:outline-none text-sm md:text-base font-medium placeholder-gray-400" autocomplete="off">
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-1.5 md:gap-2 ml-2 flex-wrap md:flex-nowrap">
+                    <button onclick="newFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">new</button>
+                    <input type="file" id="fileInput" class="hidden" onchange="importFile(event)">
+                    <button onclick="document.getElementById('fileInput').click()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">load</button>
+                    <button onclick="saveToLocalStorage()" class="px-2 md:px-3 py-1.5 border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide">save</button>
+                    <button onclick="exportFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">down</button>
+                    <!-- 🌟 PDF 추출 버튼 추가 -->
+                    <button onclick="exportPDF()" class="px-2 md:px-3 py-1.5 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide" title="PDF로 추출">PDF</button>
                 </div>
             </div>
 
-            <!-- 액션 버튼들 -->
-            <div class="flex items-center gap-1.5 md:gap-2 ml-2">
-                <button onclick="newFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current" title="새 파일">
-                    new
-                </button>
+            <!-- 2단: 서식 툴바 🌟 (overflow-visible 속성을 주어 하위 메뉴가 잘리지 않게 설정) -->
+            <div class="flex items-center flex-wrap gap-1.5 px-3 py-1.5 border-t theme-border bg-opacity-50 text-xs md:text-sm overflow-visible">
+                
+                <!-- 1) 글자크기 (Markdown H1~H6 표준 호환으로 변경) -->
+                <select onchange="execCmd('formatBlock', this.value); this.selectedIndex=0;" class="px-1 py-1 border theme-border rounded theme-input-container text-current focus:outline-none cursor-pointer text-center font-bold" style="width:55px;">
+                    <option value="" disabled="" selected="">H1</option>
+                    <option value="H1">매우 크게</option>
+                    <option value="H2">크게</option>
+                    <option value="H3">약간 크게</option>
+                    <option value="P">보통</option>
+                    <option value="H5">작게</option>
+                    <option value="H6">매우 작게</option>
+                </select>
 
-                <!-- 숨겨진 파일 입력 필드 (로컬 기기에서 불러오기 용) -->
-                <input type="file" id="fileInput" class="hidden" onchange="importFile(event)">
-                <button onclick="document.getElementById('fileInput').click()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current" title="기기에서 불러오기">
-                    load
-                </button>
+                <div class="w-px h-4 bg-gray-500 opacity-40 mx-0.5"></div>
 
-                <button onclick="saveToLocalStorage()" class="px-2 md:px-3 py-1.5 border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide" title="브라우저에 저장">
-                    save
-                </button>
+                <!-- 2,3,4) 굵게, 기울임, 삭선 -->
+                <button onclick="execCmd('bold')" class="px-2.5 py-1 border theme-border rounded theme-hover font-bold" title="굵게">B</button>
+                <button onclick="execCmd('italic')" class="px-2.5 py-1 border theme-border rounded theme-hover italic font-serif" title="기울임체">I</button>
+                <button onclick="execCmd('strikeThrough')" class="px-2.5 py-1 border theme-border rounded theme-hover line-through" title="취소선">S</button>
 
-                <button onclick="exportFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current" title="기기로 다운로드">
-                    down
+                <div class="w-px h-4 bg-gray-500 opacity-40 mx-0.5"></div>
+
+                <!-- 5) Markdown 호환 표 생성 및 행/열 편집 메뉴 -->
+                <div class="relative inline-block text-left" id="tableMenuContainer">
+                    <button onclick="toggleTableMenu(event)" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="표 생성 및 편집">
+                        <i class="ph ph-table text-base"></i>
+                    </button>
+                    <!-- 표 메뉴 드롭다운 🌟 (z-50 및 overflow-visible 적용으로 에디터 위로 완벽하게 펼쳐짐) -->
+                    <div id="tableMenu" class="hidden absolute top-full mt-1 left-0 w-32 theme-bg border theme-border rounded shadow-lg z-50 flex flex-col overflow-hidden text-sm">
+                        <button onclick="insertTable()" class="px-4 py-2 text-left theme-hover font-bold text-blue-400">표 생성</button>
+                        <div class="border-t theme-border opacity-50"></div>
+                        <button onclick="tableAction('addRow')" class="px-4 py-2 text-left theme-hover">행 추가</button>
+                        <button onclick="tableAction('addCol')" class="px-4 py-2 text-left theme-hover">열 추가</button>
+                        <button onclick="tableAction('delRow')" class="px-4 py-2 text-left theme-hover text-red-400">행 삭제</button>
+                        <button onclick="tableAction('delCol')" class="px-4 py-2 text-left theme-hover text-red-400">열 삭제</button>
+                    </div>
+                </div>
+
+                <!-- 6) 서식삭제 아이콘 -->
+                <button onclick="execCmd('removeFormat')" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover text-red-400 hover:text-red-500 flex items-center justify-center" title="서식 지우기">
+                    <i class="ph ph-eraser text-base"></i>
+                </button>
+                <button onclick="undoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="실행 취소 (Ctrl/Cmd + Z)" aria-label="Undo">
+                    <i class="ph ph-arrow-counter-clockwise text-base"></i>
+                </button>
+                <button onclick="redoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="다시 실행 (Windows: Ctrl + Y / iOS: Cmd + Shift + Z)" aria-label="Redo">
+                    <i class="ph ph-arrow-clockwise text-base"></i>
                 </button>
             </div>
         </header>
 
-        <!-- 에디터 (Textarea) -->
+        <!-- WYSIWYG 에디터 -->
         <div class="flex-1 flex w-full relative min-h-0">
-            <textarea id="editor" class="w-full h-full p-4 md:p-6 resize-none font-mono text-sm md:text-base leading-relaxed overflow-y-auto" placeholder="내용을 입력하세요... (코드를 작성하거나 메모를 남겨보세요)" spellcheck="false"></textarea>
+            <div id="editor" contenteditable="true" class="w-full h-full p-4 md:p-6 font-mono text-sm md:text-base leading-relaxed overflow-y-auto outline-none" spellcheck="false"><br></div>
         </div>
     </main>
 
     <!-- 커스텀 알림 모달 -->
-    <div id="msgModal" class="fixed inset-0 bg-black/40 z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-200 text-gray-800">
-        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 transform scale-95 transition-transform duration-200" id="msgModalContent">
+    <div id="msgModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center transition-opacity duration-200 text-gray-800 opacity-0 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-sm w-full mx-4 transform transition-transform duration-200 scale-95" id="msgModalContent">
             <div class="p-5">
-                <h3 class="text-lg font-bold mb-2" id="msgTitle">알림</h3>
-                <p class="text-gray-600 text-sm md:text-base" id="msgText">메시지 내용</p>
+                <h3 class="text-lg font-bold mb-2" id="msgTitle">PDF 추출 중</h3>
+                <p class="text-gray-600 text-sm md:text-base" id="msgText">파일을 생성하고 있습니다. 잠시만 기다려주세요...</p>
             </div>
             <div class="px-5 py-3 bg-gray-50 border-t border-gray-200 rounded-b-lg flex justify-end gap-2">
                 <button id="msgCancelBtn" class="hidden px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-100 transition-colors" onclick="closeMsg()">취소</button>
@@ -227,7 +246,7 @@
     </div>
 
     <script>
-        // --- 1. 테마(배경색) 설정 로직 ---
+        // --- 1. 테마 설정 ---
         function setTheme(themeName) {
             if (themeName === 'light') {
                 document.body.classList.add('light-theme');
@@ -239,23 +258,16 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedTheme = localStorage.getItem('nmtnote_theme');
-            if (savedTheme === 'light') {
-                setTheme('light');
-            } else {
-                setTheme('dark');
-            }
+            if (savedTheme === 'light') setTheme('light');
+            else setTheme('dark');
             loadFilesFromStorage();
             renderFileList();
-            
-            if (Object.keys(savedFiles).length === 0) {
-                newFile();
-            }
+            if (Object.keys(savedFiles).length === 0) newFile();
         });
 
-        // --- 2. PWA 설치 로직 ---
+        // PWA 설치 로직
         let deferredPrompt;
         const installBtn = document.getElementById('installBtn');
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -264,124 +276,277 @@
                 installBtn.classList.remove('hidden');
             }
         });
-
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
-                }
+                if (outcome === 'accepted') installBtn.style.display = 'none';
                 deferredPrompt = null;
             }
         });
+        window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
 
-        window.addEventListener('appinstalled', () => {
-            installBtn.style.display = 'none';
-        });
-
-        // DOM 요소 캐싱
         const editor = document.getElementById('editor');
         const filenameInput = document.getElementById('filenameInput');
         const fileListContainer = document.getElementById('fileList');
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
-
-        // NMT Note 전용 저장소 접두어 사용 (충돌 방지)
         const STORAGE_PREFIX = 'nmtnote_file_';
         let savedFiles = {};
         let currentEditingFile = null;
 
-        // --- 3. 사이드바 제어 로직 ---
-        function toggleSidebar() {
-            if (window.innerWidth < 768) {
-                sidebar.classList.toggle('mobile-open');
-                if (sidebar.classList.contains('mobile-open')) {
-                    sidebarOverlay.classList.remove('hidden');
-                } else {
-                    sidebarOverlay.classList.add('hidden');
+        // --- 2. WYSIWYG 서식 명령 ---
+        function execCmd(command, value = null) {
+            document.execCommand(command, false, value);
+            editor.focus();
+        }
+
+        // 브라우저의 contenteditable 편집 이력을 이용한 실행 취소 / 다시 실행
+        function undoEditor() {
+            editor.focus();
+            document.execCommand('undo');
+        }
+
+        function redoEditor() {
+            editor.focus();
+            document.execCommand('redo');
+        }
+
+        // --- 3. 표(Table) 생성 및 편집 로직 ---
+        let activeTableCell = null;
+
+        editor.addEventListener('click', (e) => {
+            activeTableCell = (e.target.tagName === 'TD' || e.target.tagName === 'TH') ? e.target : null;
+        });
+        editor.addEventListener('keyup', (e) => {
+            const sel = window.getSelection();
+            if (sel.rangeCount > 0) {
+                let node = sel.getRangeAt(0).startContainer;
+                while (node && node !== editor) {
+                    if (node.nodeName === 'TD' || node.nodeName === 'TH') { activeTableCell = node; return; }
+                    node = node.parentNode;
                 }
+            }
+            activeTableCell = null;
+        });
+
+        function toggleTableMenu(event) {
+            event.stopPropagation();
+            document.getElementById('tableMenu').classList.toggle('hidden');
+        }
+        
+        document.addEventListener('click', (e) => {
+            const tableMenu = document.getElementById('tableMenu');
+            if (!e.target.closest('#tableMenuContainer') && !tableMenu.classList.contains('hidden')) {
+                tableMenu.classList.add('hidden');
+            }
+        });
+
+        // 🌟 헤더 없이 순수 빈칸 테이블만 생성하도록 수정
+        function insertTable() {
+            document.getElementById('tableMenu').classList.add('hidden');
+            const rowsInput = prompt('생성할 표의 행(줄) 수를 입력하세요:', '3');
+            if (!rowsInput) return;
+            const colsInput = prompt('생성할 표의 열(칸) 수를 입력하세요:', '3');
+            if (!colsInput) return;
+
+            const rows = parseInt(rowsInput, 10);
+            const cols = parseInt(colsInput, 10);
+
+            if (isNaN(rows) || isNaN(cols) || rows <= 0 || cols <= 0) {
+                showMsg('경고', '올바른 숫자를 입력해 주세요.');
+                return;
+            }
+
+            let tableHTML = '<table style="border: 1px solid black; border-collapse: collapse;"><tbody>';
+            for (let r = 0; r < rows; r++) {
+                tableHTML += '<tr>';
+                for (let c = 0; c < cols; c++) {
+                    tableHTML += `<td><br></td>`; // 텍스트 없이 완벽한 빈 셀 생성
+                }
+                tableHTML += '</tr>';
+            }
+            tableHTML += '</tbody></table><p><br></p>';
+
+            execCmd('insertHTML', tableHTML);
+        }
+
+        function tableAction(action) {
+            document.getElementById('tableMenu').classList.add('hidden');
+            if (!activeTableCell) {
+                showMsg('알림', '표 내부의 셀(칸)을 먼저 클릭해 주세요.');
+                return;
+            }
+
+            const originalCell = activeTableCell;
+            const originalRow = originalCell.closest('tr');
+            const originalTable = originalRow ? originalRow.closest('table') : null;
+            if (!originalTable || !editor.contains(originalTable)) {
+                activeTableCell = null;
+                showMsg('알림', '표 내부의 셀(칸)을 먼저 클릭해 주세요.');
+                return;
+            }
+
+            const tableIndex = Array.from(editor.querySelectorAll('table')).indexOf(originalTable);
+            const rowIndex = Array.from(originalTable.rows).indexOf(originalRow);
+            const cellIndex = Array.from(originalRow.children).indexOf(originalCell);
+            const workingTable = originalTable.cloneNode(true);
+            const targetRow = workingTable.rows[rowIndex];
+            const targetCell = targetRow ? targetRow.children[cellIndex] : null;
+            if (!targetRow || !targetCell) return;
+
+            let removeTable = false;
+
+            if (action === 'addRow') {
+                const newRow = document.createElement('tr');
+                Array.from(targetRow.children).forEach((cell) => {
+                    const newCell = document.createElement(cell.tagName);
+                    newCell.innerHTML = '<br>';
+                    newRow.appendChild(newCell);
+                });
+                targetRow.parentNode.insertBefore(newRow, targetRow.nextSibling);
+            } else if (action === 'addCol') {
+                Array.from(workingTable.rows).forEach((row) => {
+                    const referenceCell = row.children[cellIndex];
+                    const newCell = document.createElement(referenceCell?.tagName || 'td');
+                    newCell.innerHTML = '<br>';
+                    if (referenceCell) row.insertBefore(newCell, referenceCell.nextSibling);
+                    else row.appendChild(newCell);
+                });
+            } else if (action === 'delRow') {
+                targetRow.parentNode.removeChild(targetRow);
+                removeTable = workingTable.rows.length === 0;
+            } else if (action === 'delCol') {
+                Array.from(workingTable.rows).forEach((row) => {
+                    if (row.children[cellIndex]) row.removeChild(row.children[cellIndex]);
+                });
+                removeTable = !workingTable.rows.length || workingTable.rows[0].children.length === 0;
             } else {
-                sidebar.classList.toggle('desktop-closed');
+                return;
+            }
+
+            // 표 전체를 insertHTML 명령으로 교체해 행/열 편집도 브라우저 Undo 이력에 남깁니다.
+            const replacementHTML = removeTable ? '<p><br></p>' : workingTable.outerHTML;
+            let insertedByCommand = false;
+            try {
+                editor.focus();
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNode(originalTable);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                insertedByCommand = document.execCommand('insertHTML', false, replacementHTML);
+            } catch (error) {
+                console.warn('Table edit history fallback:', error);
+            }
+
+            // 일부 모바일 브라우저에서 insertHTML이 실패하면 기존 DOM 교체 방식으로 안전하게 처리합니다.
+            if (!insertedByCommand) {
+                if (removeTable) originalTable.replaceWith(document.createElement('p'));
+                else originalTable.replaceWith(workingTable);
+            }
+
+            if (removeTable) {
+                activeTableCell = null;
+            } else {
+                const updatedTable = editor.querySelectorAll('table')[tableIndex];
+                const updatedRow = updatedTable?.rows[Math.min(rowIndex, updatedTable.rows.length - 1)];
+                activeTableCell = updatedRow?.children[Math.min(cellIndex, updatedRow.children.length - 1)] || null;
             }
         }
 
-        function closeSidebar() {
-            if (window.innerWidth < 768) {
-                sidebar.classList.remove('mobile-open');
-                sidebarOverlay.classList.add('hidden');
-            } else {
-                sidebar.classList.add('desktop-closed');
-            }
-        }
-
-        // --- 파일 관리 로직 ---
+        // --- 4. 파일 관리 및 변환 로직 ---
         function loadFilesFromStorage() {
             savedFiles = {};
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith(STORAGE_PREFIX)) {
-                    const displayFileName = key.replace(STORAGE_PREFIX, '');
-                    savedFiles[displayFileName] = localStorage.getItem(key);
+                    savedFiles[key.replace(STORAGE_PREFIX, '')] = localStorage.getItem(key);
                 }
             }
         }
 
-        function saveFilesToStorage(filename, content) {
-            try {
-                localStorage.setItem(STORAGE_PREFIX + filename, content);
-                loadFilesFromStorage(); 
-                renderFileList();
-            } catch (e) {
-                showMsg('저장 실패', '기기 저장 공간이 부족하거나 오류가 발생했습니다.');
-            }
+        // 제목/강조/취소선/목록/링크/표 등 실제 서식이 사용되었는지 확인합니다.
+        function hasRichFormatting() {
+            const richElements = editor.querySelector(
+                'h1,h2,h3,h4,h5,h6,strong,b,em,i,s,strike,del,u,code,pre,blockquote,ul,ol,li,a,table,sub,sup'
+            );
+            if (richElements) return true;
+
+            // 일부 브라우저나 붙여넣기 콘텐츠가 태그 대신 inline style로 서식을 기록하는 경우도 확인합니다.
+            return Array.from(editor.querySelectorAll('[style]')).some((element) => {
+                const style = element.getAttribute('style') || '';
+                return /font-weight|font-style|text-decoration|font-size|vertical-align/i.test(style);
+            });
         }
 
-        function newFile() {
-            editor.value = '';
-            filenameInput.value = 'untitled.txt';
-            currentEditingFile = null;
-            if (window.innerWidth < 768) closeSidebar();
+        function forceFileExtension(filename, extension) {
+            const cleanName = (filename || 'untitled').trim() || 'untitled';
+            const lastSlash = Math.max(cleanName.lastIndexOf('/'), cleanName.lastIndexOf('\\'));
+            const lastDot = cleanName.lastIndexOf('.');
+            const baseName = lastDot > lastSlash + 0 ? cleanName.slice(0, lastDot) : cleanName;
+            return `${baseName}.${extension}`;
         }
 
+        // 사용자 Save 버튼에서 호출되는 저장 함수입니다.
         function saveToLocalStorage() {
-            let filename = filenameInput.value.trim();
-            const content = editor.value;
+            let filename = filenameInput.value.trim() || 'untitled.txt';
 
-            if (!filename) {
-                filename = 'untitled.txt';
-                filenameInput.value = filename;
+            if (hasRichFormatting()) {
+                showMsg(
+                    'Markdown 저장 확인',
+                    '서식이 사용되었습니다. 서식을 포함한 MarkDown으로 저장합니까?',
+                    true,
+                    function() {
+                        filename = forceFileExtension(filename, 'md');
+                        filenameInput.value = filename;
+                        persistCurrentFile(filename);
+                    }
+                );
+                return;
             }
 
-            saveFilesToStorage(filename, content);
-            currentEditingFile = filename;
-            showMsg('저장 완료', `[${filename}] 브라우저에 저장되었습니다.`);
+            filenameInput.value = filename;
+            persistCurrentFile(filename);
+        }
+
+        // 가져오기(import) 시에는 확인창 없이 현재 파일명을 유지해 내부 저장합니다.
+        function persistCurrentFile(filename = null) {
+            const targetName = filename || filenameInput.value.trim() || 'untitled.txt';
+            filenameInput.value = targetName;
+            localStorage.setItem(STORAGE_PREFIX + targetName, editor.innerHTML);
+            loadFilesFromStorage();
+            renderFileList();
+            currentEditingFile = targetName;
+            showMsg('저장 완료', `[${targetName}] 브라우저에 저장되었습니다.`);
         }
 
         function openFile(filename) {
             if (savedFiles[filename] !== undefined) {
-                editor.value = savedFiles[filename];
+                editor.innerHTML = savedFiles[filename];
                 filenameInput.value = filename;
                 currentEditingFile = filename;
                 if (window.innerWidth < 768) closeSidebar();
             }
         }
 
+        function newFile() {
+            editor.innerHTML = '';
+            filenameInput.value = 'untitled.txt';
+            currentEditingFile = null;
+            if (window.innerWidth < 768) closeSidebar();
+        }
+
         function deleteFile(filename, event) {
             event.stopPropagation();
-            
             showMsg('파일 삭제', `[${filename}] 파일을 삭제하시겠습니까?`, true, function() {
                 localStorage.removeItem(STORAGE_PREFIX + filename);
                 loadFilesFromStorage(); 
                 renderFileList();
-                
-                if (currentEditingFile === filename) {
-                    newFile();
-                }
+                if (currentEditingFile === filename) newFile();
             });
         }
 
-        // --- 외부 기기 파일 연동 ---
         function importFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -389,53 +554,399 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const content = e.target.result;
-                editor.value = content;
+                let parsedContent = content;
+
+                if (file.name.toLowerCase().endsWith('.md')) {
+                    parsedContent = marked.parse(content);
+                } else if (!file.name.toLowerCase().endsWith('.html')) {
+                    parsedContent = content.replace(/\n/g, '<br>');
+                }
+
+                editor.innerHTML = parsedContent;
                 filenameInput.value = file.name;
-                currentEditingFile = null; 
-                saveToLocalStorage();
+                currentEditingFile = null;
+                persistCurrentFile(file.name);
                 event.target.value = '';
             };
             reader.readAsText(file);
         }
 
-        // 🌟 아이패드 사파리 강제 .txt 덧붙임 방지 수정
+        // Markdown 표 셀과 본문에 동일한 inline 서식 규칙을 적용합니다.
+        function createInlineMarkdownService() {
+            const service = new TurndownService({
+                emDelimiter: '*',
+                strongDelimiter: '**',
+                linkStyle: 'inlined'
+            });
+            addMarkdownInlineRules(service);
+            return service;
+        }
+
+        function addMarkdownInlineRules(service) {
+            service.addRule('nmtBold', {
+                filter: ['strong', 'b'],
+                replacement: (content) => content ? `**${content}**` : ''
+            });
+            service.addRule('nmtItalic', {
+                filter: ['em', 'i'],
+                replacement: (content) => content ? `*${content}*` : ''
+            });
+            service.addRule('nmtStrikethrough', {
+                filter: ['del', 's', 'strike'],
+                replacement: (content) => content ? `~~${content}~~` : ''
+            });
+        }
+
+        // Markdown 표는 일반 행/열만 지원합니다. 병합 기능은 제공하지 않습니다.
+        // 이전 버전에 병합된 셀이 남아 있는 경우에는 내보내기 시 일반 셀 구조로 평탄화합니다.
+        function tableToMarkdown(table, inlineService) {
+            const rows = Array.from(table.querySelectorAll('tr')).filter((row) => row.closest('table') === table);
+            if (rows.length === 0) return '';
+
+            const rowCells = rows.map((row) => Array.from(row.cells));
+            // 예전 파일의 병합 셀도 기존 열 위치가 크게 틀어지지 않도록 폭만 계산하고,
+            // Markdown 결과에는 colspan/rowspan 속성을 절대 출력하지 않습니다.
+            const columnCount = Math.max(1, ...rowCells.map((cells) =>
+                cells.reduce((sum, cell) => sum + Math.max(1, Number(cell.colSpan) || 1), 0)
+            ));
+
+            const matrix = rowCells.map((cells) => {
+                const values = Array(columnCount).fill('');
+                let column = 0;
+
+                cells.forEach((cell) => {
+                    const span = Math.max(1, Number(cell.colSpan) || 1);
+                    const cellClone = cell.cloneNode(true);
+                    cellClone.removeAttribute('colspan');
+                    cellClone.removeAttribute('rowspan');
+                    cellClone.querySelectorAll('br').forEach((lineBreak) => {
+                        lineBreak.replaceWith(document.createTextNode(' '));
+                    });
+                    const cellMarkdown = inlineService.turndown(cellClone.innerHTML || '')
+                        .replace(/\r?\n/g, ' ')
+                        .replace(/\s+/g, ' ')
+                        .replace(/\|/g, '\\|')
+                        .trim();
+
+                    if (column < columnCount) values[column] = cellMarkdown;
+                    column += span;
+                });
+
+                return values;
+            });
+
+            const header = matrix[0];
+            const separator = Array(columnCount).fill('---');
+            const body = matrix.slice(1);
+            const formatRow = (cells) => `| ${cells.map((value) => value || ' ').join(' | ')} |`;
+            return [formatRow(header), formatRow(separator), ...body.map(formatRow)].join('\n');
+        }
+
+        function createMarkdownService() {
+            const service = new TurndownService({
+                headingStyle: 'atx',
+                bulletListMarker: '-',
+                codeBlockStyle: 'fenced',
+                emDelimiter: '*',
+                strongDelimiter: '**',
+                linkStyle: 'inlined'
+            });
+
+            // HTML 표를 직접 GFM 파이프 표로 변환해 HTML 태그가 결과에 남지 않게 합니다.
+            const inlineService = createInlineMarkdownService();
+            addMarkdownInlineRules(service);
+            service.addRule('nmtPipeTable', {
+                filter: 'table',
+                replacement: function(content, node) {
+                    const markdownTable = tableToMarkdown(node, inlineService);
+                    return markdownTable ? `\n\n${markdownTable}\n\n` : '';
+                }
+            });
+
+            return service;
+        }
+
         function exportFile() {
-            const content = editor.value;
             let filename = filenameInput.value.trim() || 'untitled.txt';
-            
-            // MIME 타입을 application/octet-stream으로 지정하여 사파리가 확장자를 강제 변경하지 못하도록 조치
-            const blob = new Blob([content], { type: 'application/octet-stream' });
+            const lowerName = filename.toLowerCase();
+            let contentToSave = editor.innerHTML;
+            let mimeType = 'text/plain;charset=utf-8';
+
+            if (lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
+                const turndownService = createMarkdownService();
+                contentToSave = turndownService.turndown(editor.innerHTML)
+                    .replace(/\r\n/g, '\n')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .trim() + '\n';
+                mimeType = 'text/markdown;charset=utf-8';
+            } else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
+                mimeType = 'text/html;charset=utf-8';
+            } else {
+                contentToSave = editor.innerText;
+            }
+
+            const blob = new Blob([contentToSave], { type: mimeType });
             const url = URL.createObjectURL(blob);
-            
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
             document.body.appendChild(a);
             a.click();
-            
             document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
-        // --- UI 렌더링 및 인터랙션 ---
-        function renderFileList() {
-            fileListContainer.innerHTML = '';
-            const filenames = Object.keys(savedFiles);
-            
-            if (filenames.length === 0) {
-                fileListContainer.innerHTML = `
-                    <div class="text-center opacity-60 text-sm mt-10">
-                        <i class="ph ph-folder-open text-4xl mb-2"></i><br>
-                        저장된 파일이 없습니다.
-                    </div>
-                `;
+        // A4 흰 배경 / 검정 글자 전용 PDF 추출
+        // 캡처 대상은 화면 뒤(z-index:-1)나 화면 밖에 두지 않습니다.
+        // 실제 표시되는 독립 출력 레이어에 배치해 html2canvas가 내용 자체를 렌더링하도록 합니다.
+        async function exportPDF() {
+            let filename = filenameInput.value.trim() || 'untitled';
+            filename = filename.replace(/\.[^/.]+$/, '') + '.pdf';
+
+            if (typeof html2pdf !== 'function') {
+                showMsg('PDF 추출 실패', 'PDF 라이브러리를 불러오지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.');
                 return;
             }
 
+            const hasContent = (editor.innerText || '').trim().length > 0 ||
+                editor.querySelector('table, img, canvas, svg');
+            if (!hasContent) {
+                showMsg('PDF 추출', '작성된 내용이 없습니다. 내용을 입력한 뒤 다시 시도해 주세요.');
+                return;
+            }
+
+            // 흰색 전체 화면 레이어를 만들어 캡처 대상이 실제 렌더 트리에 보이도록 합니다.
+            const overlay = document.createElement('div');
+            overlay.id = 'nmtPdfExportOverlay';
+            Object.assign(overlay.style, {
+                position: 'fixed',
+                inset: '0',
+                zIndex: '2147483647',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'flex-start',
+                overflow: 'auto',
+                boxSizing: 'border-box',
+                padding: '16px',
+                margin: '0',
+                background: '#ffffff',
+                color: '#000000',
+                opacity: '1',
+                visibility: 'visible',
+                pointerEvents: 'none'
+            });
+
+            const tempDiv = document.createElement('div');
+            tempDiv.id = 'nmtPdfExportRoot';
+            tempDiv.innerHTML = editor.innerHTML;
+            Object.assign(tempDiv.style, {
+                position: 'relative',
+                display: 'block',
+                flex: '0 0 auto',
+                width: '170mm',
+                minHeight: '1px',
+                boxSizing: 'border-box',
+                padding: '0',
+                margin: '0 auto',
+                overflow: 'visible',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                fontFamily: "'Malgun Gothic', 'Apple SD Gothic Neo', 'Segoe UI', Arial, sans-serif",
+                fontSize: '12pt',
+                lineHeight: '1.6',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                overflowWrap: 'anywhere'
+            });
+
+            // 에디터 테마/다크모드 색상이 PDF에 섞이지 않도록 출력용 색을 고정합니다.
+            tempDiv.querySelectorAll('*').forEach((element) => {
+                element.style.color = '#000000';
+                element.style.maxWidth = '100%';
+                element.style.boxSizing = 'border-box';
+                element.style.backgroundColor = 'transparent';
+            });
+
+            // html2canvas에서 text-decoration: line-through가 글자 위쪽에 그려지는
+            // 렌더링 오차를 피하기 위해 PDF 복제본에서만 취소선을 중앙 배경선으로 대체합니다.
+            // 원본 editor DOM과 Markdown 저장 데이터는 변경하지 않습니다.
+            const strikeSelector = 'del, s, strike, [style*="line-through"]';
+            const strikeElements = Array.from(tempDiv.querySelectorAll(strikeSelector));
+            strikeElements.forEach((strikeElement) => {
+                const isNestedStrike = Boolean(
+                    strikeElement.parentElement && strikeElement.parentElement.closest(strikeSelector)
+                );
+
+                // html2canvas가 자체 취소선을 다시 그리지 않도록 모든 대상의 기본 선을 먼저 제거합니다.
+                strikeElement.style.setProperty('text-decoration', 'none', 'important');
+                strikeElement.style.setProperty('text-decoration-line', 'none', 'important');
+
+                // 중첩된 취소선은 바깥 요소의 중앙선으로 함께 표현해 선이 두꺼워지지 않게 합니다.
+                if (isNestedStrike) return;
+
+                strikeElement.style.setProperty('background-color', 'transparent', 'important');
+                strikeElement.style.setProperty(
+                    'background-image',
+                    'linear-gradient(to bottom, transparent 48%, #111111 48%, #111111 52%, transparent 52%)',
+                    'important'
+                );
+                strikeElement.style.setProperty('background-repeat', 'repeat', 'important');
+                strikeElement.style.setProperty('background-size', '100% 100%', 'important');
+                strikeElement.style.setProperty('background-origin', 'border-box', 'important');
+                strikeElement.style.setProperty('background-clip', 'border-box', 'important');
+                strikeElement.style.setProperty('-webkit-box-decoration-break', 'clone');
+                strikeElement.style.setProperty('box-decoration-break', 'clone');
+            });
+
+            tempDiv.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach((heading) => {
+                heading.style.fontWeight = '700';
+                heading.style.margin = '0 0 0.55em';
+                if (heading.tagName === 'H1') heading.style.fontSize = '22pt';
+                else if (heading.tagName === 'H2') heading.style.fontSize = '18pt';
+                else if (heading.tagName === 'H3') heading.style.fontSize = '15pt';
+                else if (heading.tagName === 'H5') heading.style.fontSize = '10pt';
+                else if (heading.tagName === 'H6') heading.style.fontSize = '8pt';
+            });
+
+            tempDiv.querySelectorAll('p,div,ul,ol,blockquote,pre').forEach((block) => {
+                block.style.marginTop = block.style.marginTop || '0';
+                block.style.marginBottom = block.style.marginBottom || '0.45em';
+            });
+            tempDiv.querySelectorAll('ul').forEach((list) => { list.style.listStyleType = 'disc'; list.style.paddingLeft = '1.5em'; });
+            tempDiv.querySelectorAll('ol').forEach((list) => { list.style.listStyleType = 'decimal'; list.style.paddingLeft = '1.5em'; });
+            tempDiv.querySelectorAll('li').forEach((item) => { item.style.display = 'list-item'; });
+            tempDiv.querySelectorAll('hr').forEach((rule) => { rule.style.borderTop = '1px solid #999999'; });
+
+            tempDiv.querySelectorAll('table').forEach((table) => {
+                table.style.width = '100%';
+                table.style.borderCollapse = 'collapse';
+                table.style.margin = '10px 0';
+                table.style.tableLayout = 'auto';
+                table.style.pageBreakInside = 'auto';
+            });
+            tempDiv.querySelectorAll('th,td').forEach((cell) => {
+                // 과거 파일에 병합 셀이 남아 있어도 PDF에는 내용 중심의 일반 셀로 출력합니다.
+                cell.removeAttribute('colspan');
+                cell.removeAttribute('rowspan');
+                cell.style.border = '1px solid #333333';
+                cell.style.padding = '6px 8px';
+                cell.style.verticalAlign = 'top';
+                cell.style.backgroundColor = '#ffffff';
+                cell.style.pageBreakInside = 'avoid';
+            });
+            tempDiv.querySelectorAll('img').forEach((image) => {
+                image.style.maxWidth = '100%';
+                image.style.height = 'auto';
+            });
+            tempDiv.querySelectorAll('pre,code').forEach((code) => {
+                code.style.fontFamily = "Consolas, 'Courier New', monospace";
+                code.style.whiteSpace = 'pre-wrap';
+                code.style.overflowWrap = 'anywhere';
+            });
+
+            overlay.appendChild(tempDiv);
+            document.body.appendChild(overlay);
+            showMsg('PDF 추출 중', '작성한 내용을 A4 PDF로 변환하고 있습니다.');
+
+            try {
+                // 브라우저가 출력 레이어와 웹폰트를 실제로 배치한 뒤 캡처합니다.
+                if (document.fonts && document.fonts.ready) {
+                    await document.fonts.ready.catch(() => {});
+                }
+                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+
+                // 이미지가 있는 문서라면 로딩 완료까지 기다립니다. 실패한 이미지는 건너뜁니다.
+                const images = Array.from(tempDiv.querySelectorAll('img'));
+                await Promise.all(images.map((image) => {
+                    if (image.complete) return Promise.resolve();
+                    return new Promise((resolve) => {
+                        let finished = false;
+                        const finish = () => {
+                            if (finished) return;
+                            finished = true;
+                            clearTimeout(timeoutId);
+                            resolve();
+                        };
+                        const timeoutId = setTimeout(finish, 5000);
+                        image.addEventListener('load', finish, { once: true });
+                        image.addEventListener('error', finish, { once: true });
+                    });
+                }));
+
+                const rect = tempDiv.getBoundingClientRect();
+                if (rect.width < 10 || rect.height < 1) {
+                    throw new Error('PDF 출력 영역의 크기가 올바르지 않습니다.');
+                }
+
+                const opt = {
+                    margin: [30, 20, 30, 20],
+                    filename: filename,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: {
+                        scale: 2,
+                        useCORS: true,
+                        backgroundColor: '#ffffff',
+                        letterRendering: true,
+                        scrollX: 0,
+                        scrollY: 0,
+                        windowWidth: Math.max(document.documentElement.clientWidth, Math.ceil(rect.width)),
+                        windowHeight: Math.max(document.documentElement.clientHeight, Math.ceil(rect.height))
+                    },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                    pagebreak: { mode: ['css', 'legacy'], avoid: ['tr', 'img', 'h1', 'h2', 'h3'] }
+                };
+
+                // 먼저 캔버스를 만든 뒤 내용 픽셀이 실제 존재하는지 검사합니다.
+                const worker = html2pdf().set(opt).from(tempDiv).toCanvas();
+                const canvas = await worker.get('canvas');
+                if (!canvas || canvas.width < 10 || canvas.height < 10) {
+                    throw new Error('PDF 캡처 캔버스가 비어 있습니다.');
+                }
+
+                let hasVisibleContent = true;
+                try {
+                    const context = canvas.getContext('2d', { willReadFrequently: true });
+                    const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+                    let darkPixelSamples = 0;
+                    // 캔버스를 일부 샘플링해 흰 배경 이외의 글자/선이 실제로 그려졌는지 확인합니다.
+                    for (let i = 0; i < pixels.length; i += 4 * 16) {
+                        if (pixels[i] < 245 || pixels[i + 1] < 245 || pixels[i + 2] < 245) {
+                            darkPixelSamples++;
+                            if (darkPixelSamples >= 3) break;
+                        }
+                    }
+                    hasVisibleContent = darkPixelSamples >= 3;
+                } catch (pixelError) {
+                    // 외부 이미지 등으로 픽셀 검사가 제한되는 경우에는 캔버스 크기 검증을 통과하면 저장을 진행합니다.
+                    console.warn('PDF 캔버스 픽셀 검사를 건너뜁니다:', pixelError);
+                }
+
+                if (!hasVisibleContent && (editor.innerText || '').trim()) {
+                    throw new Error('내용을 캡처하지 못했습니다. PDF를 저장하지 않았습니다.');
+                }
+
+                await worker.toPdf().save();
+                closeMsg();
+                showMsg('PDF 추출 완료', `[${filename}] 파일을 생성했습니다.`);
+            } catch (error) {
+                console.error('PDF export failed:', error);
+                closeMsg();
+                showMsg('PDF 추출 실패', 'PDF 내용 생성에 실패했습니다. 빈 PDF가 저장되지 않도록 중단했습니다. 인터넷 연결과 브라우저를 확인한 뒤 다시 시도해 주세요.');
+            } finally {
+                overlay.remove();
+            }
+        }
+
+        function renderFileList() {
+            fileListContainer.innerHTML = '';
+            const filenames = Object.keys(savedFiles);
+            if (filenames.length === 0) {
+                fileListContainer.innerHTML = `<div class="text-center opacity-60 text-sm mt-10"><i class="ph ph-folder-open text-4xl mb-2"></i><br>저장된 파일이 없습니다.</div>`;
+                return;
+            }
             filenames.forEach(filename => {
                 const item = document.createElement('div');
                 item.className = 'flex items-center justify-between p-2 mb-1 rounded cursor-pointer theme-hover transition-colors';
-                
                 let icon = 'ph-file-text';
                 if(filename.endsWith('.html')) icon = 'ph-file-html';
                 else if(filename.endsWith('.js')) icon = 'ph-file-js';
@@ -448,81 +959,108 @@
                     </div>
                     <button class="p-2 transition-colors hover:text-red-500" style="color: var(--text-color); opacity: 0.7;" onclick="deleteFile('${filename}', event)">
                         <i class="ph ph-trash text-lg"></i>
-                    </button>
-                `;
+                    </button>`;
                 fileListContainer.appendChild(item);
             });
         }
 
-        // Tab 키 띄어쓰기 4칸 적용
+        // --- 5. iOS 한글 Tab 조합 버그 방지 및 사이드바 ---
         editor.addEventListener('keydown', function(e) {
+            const key = (e.key || '').toLowerCase();
+            const hasModifier = e.ctrlKey || e.metaKey;
+
+            // 취소선: Windows Ctrl+Shift+X / iOS·Mac Cmd+Shift+X
+            if (hasModifier && e.shiftKey && key === 'x') {
+                e.preventDefault();
+                execCmd('strikeThrough');
+                return;
+            }
+
+            // 실행 취소: Ctrl+Z / Cmd+Z
+            if (hasModifier && key === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                undoEditor();
+                return;
+            }
+
+            // 다시 실행: Windows Ctrl+Y 또는 Ctrl+Shift+Z / iOS·Mac Cmd+Shift+Z
+            if ((e.ctrlKey && key === 'y' && !e.shiftKey) || (hasModifier && e.shiftKey && key === 'z')) {
+                e.preventDefault();
+                redoEditor();
+                return;
+            }
+
             if (e.key === 'Tab') {
                 e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + 4;
+                if (e.isComposing) return;
+                if (!document.execCommand('insertText', false, '    ')) {
+                    const sel = window.getSelection();
+                    if (sel.rangeCount) {
+                        const range = sel.getRangeAt(0);
+                        range.deleteContents();
+                        const textNode = document.createTextNode('    ');
+                        range.insertNode(textNode);
+                        range.setStartAfter(textNode);
+                        range.setEndAfter(textNode);
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+                    }
+                }
             }
         });
 
-        // --- 커스텀 모달 ---
-        let msgConfirmCallback = null;
-
-        function showMsg(title, text, isConfirm = false, onConfirm = null) {
-            const modal = document.getElementById('msgModal');
-            const content = document.getElementById('msgModalContent');
-            const titleEl = document.getElementById('msgTitle');
-            const textEl = document.getElementById('msgText');
-            const cancelBtn = document.getElementById('msgCancelBtn');
-
-            titleEl.textContent = title;
-            textEl.textContent = text;
-            
-            if (isConfirm) {
-                cancelBtn.classList.remove('hidden');
-                msgConfirmCallback = onConfirm;
-            } else {
-                cancelBtn.classList.add('hidden');
-                msgConfirmCallback = null;
-            }
-
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.classList.remove('opacity-0');
-                content.classList.remove('scale-95');
-            }, 10);
+        function toggleSidebar() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('mobile-open');
+                if (sidebar.classList.contains('mobile-open')) sidebarOverlay.classList.remove('hidden');
+                else sidebarOverlay.classList.add('hidden');
+            } else sidebar.classList.toggle('desktop-closed');
+        }
+        function closeSidebar() {
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('mobile-open');
+                sidebarOverlay.classList.add('hidden');
+            } else sidebar.classList.add('desktop-closed');
         }
 
-        function closeMsg() {
+        // 모달 및 서비스워커
+        let msgConfirmCallback = null;
+        let msgCloseTimer = null;
+        function showMsg(title, text, isConfirm = false, onConfirm = null) {
+            if (msgCloseTimer) {
+                clearTimeout(msgCloseTimer);
+                msgCloseTimer = null;
+            }
+            document.getElementById('msgTitle').textContent = title;
+            document.getElementById('msgText').textContent = text;
+            const cancelBtn = document.getElementById('msgCancelBtn');
+            if (isConfirm) { cancelBtn.classList.remove('hidden'); msgConfirmCallback = onConfirm; } 
+            else { cancelBtn.classList.add('hidden'); msgConfirmCallback = null; }
             const modal = document.getElementById('msgModal');
-            const content = document.getElementById('msgModalContent');
-            
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('msgModalContent').classList.remove('scale-95'); }, 10);
+        }
+        function closeMsg() {
+            msgConfirmCallback = null;
+            const modal = document.getElementById('msgModal');
             modal.classList.add('opacity-0');
-            content.classList.add('scale-95');
-            
-            setTimeout(() => {
+            document.getElementById('msgModalContent').classList.add('scale-95');
+            if (msgCloseTimer) clearTimeout(msgCloseTimer);
+            msgCloseTimer = setTimeout(() => {
                 modal.classList.add('hidden');
+                msgCloseTimer = null;
             }, 200);
         }
-
         function confirmMsg() {
-            if(msgConfirmCallback) {
-                msgConfirmCallback(); 
-                msgConfirmCallback = null;
-            }
-            closeMsg(); 
+            const callback = msgConfirmCallback;
+            msgConfirmCallback = null;
+            closeMsg();
+            if (callback) callback();
         }
 
-        // --- 서비스 워커 등록 ---
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then((reg) => {
-                    console.log('NMT Note Service Worker 등록 완료', reg);
-                }).catch((err) => {
-                    console.log('Service Worker 등록 실패', err);
-                });
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').then((reg) => {}).catch((err) => {}); });
         }
     </script>
-</body>
-</html>
+
+</body></html>
