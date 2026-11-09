@@ -141,7 +141,7 @@
 
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-011)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-001)</span>
         </div>
     </aside>
 
@@ -965,20 +965,35 @@
         }
 
         // --- 5. iOS 한글 IME 조합 보호 및 사이드바 ---
-        // iOS 외장 키보드에서 한글 조합 중 Tab이 들어오면 브라우저/IME의
-        // 입력 처리를 가로채지 않도록 조합 상태를 별도로 추적합니다.
+        // iOS Safari는 조합이 끝나는 순간 Tab keydown의 isComposing 값이
+        // false로 전달되는 경우가 있어, 문서 단계에서 조합 상태를 추적하고
+        // compositionend 직후 짧은 보호 구간을 둡니다.
         let isEditorComposing = false;
-        editor.addEventListener('compositionstart', function() {
-            isEditorComposing = true;
-        });
-        editor.addEventListener('compositionend', function() {
-            isEditorComposing = false;
-        });
+        let lastCompositionEndAt = 0;
+
+        document.addEventListener('compositionstart', function(e) {
+            if (e.target === editor || editor.contains(e.target)) {
+                isEditorComposing = true;
+            }
+        }, true);
+
+        document.addEventListener('compositionend', function(e) {
+            if (e.target === editor || editor.contains(e.target)) {
+                isEditorComposing = false;
+                lastCompositionEndAt = Date.now();
+            }
+        }, true);
 
         editor.addEventListener('keydown', function(e) {
-            // 조합 중인 키 이벤트는 preventDefault()를 포함해 앱에서 가로채지 않습니다.
-            // keyCode 229는 일부 iOS/Safari IME 이벤트의 보조 감지용입니다.
-            if (isEditorComposing || e.isComposing || e.keyCode === 229) return;
+            const isTabKey = e.key === 'Tab' || e.keyCode === 9;
+            const imeEvent = isEditorComposing || e.isComposing || e.keyCode === 229 || e.which === 229;
+
+            // 조합 중에는 어떤 키 처리도 개입하지 않습니다.
+            if (imeEvent) return;
+
+            // iOS에서 조합 종료와 Tab 이벤트가 거의 동시에 발생하는 경우도 보호합니다.
+            // 이 짧은 구간에는 Tab을 가로채지 않고 기본 동작에 맡깁니다.
+            if (isTabKey && Date.now() - lastCompositionEndAt < 500) return;
 
             const key = (e.key || '').toLowerCase();
             const hasModifier = e.ctrlKey || e.metaKey;
@@ -1004,12 +1019,11 @@
                 return;
             }
 
-            if (e.key === 'Tab') {
-                // IME 조합이 아닐 때만 Tab을 공백 4칸으로 변환합니다.
+            if (isTabKey) {
                 e.preventDefault();
                 if (!document.execCommand('insertText', false, '    ')) {
                     const sel = window.getSelection();
-                    if (sel.rangeCount) {
+                    if (sel && sel.rangeCount) {
                         const range = sel.getRangeAt(0);
                         range.deleteContents();
                         const textNode = document.createTextNode('    ');
