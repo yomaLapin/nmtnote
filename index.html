@@ -510,11 +510,29 @@
             persistCurrentFile(filename);
         }
 
+        // HTML/HTM은 웹페이지가 아닌 소스 텍스트로 취급합니다.
+        function isHtmlSourceFile(filename) {
+            return /\.html?$/i.test(filename || '');
+        }
+
+        function getEditorContentForFile(filename) {
+            // HTML 소스 모드에서는 태그를 실행하지 않고 텍스트 그대로 저장합니다.
+            return isHtmlSourceFile(filename) ? editor.innerText : editor.innerHTML;
+        }
+
+        function setEditorContentForFile(filename, content) {
+            if (isHtmlSourceFile(filename)) {
+                editor.textContent = content ?? '';
+            } else {
+                editor.innerHTML = content ?? '';
+            }
+        }
+
         // 가져오기(import) 시에는 확인창 없이 현재 파일명을 유지해 내부 저장합니다.
         function persistCurrentFile(filename = null) {
             const targetName = filename || filenameInput.value.trim() || 'untitled.txt';
             filenameInput.value = targetName;
-            localStorage.setItem(STORAGE_PREFIX + targetName, editor.innerHTML);
+            localStorage.setItem(STORAGE_PREFIX + targetName, getEditorContentForFile(targetName));
             loadFilesFromStorage();
             renderFileList();
             currentEditingFile = targetName;
@@ -523,7 +541,7 @@
 
         function openFile(filename) {
             if (savedFiles[filename] !== undefined) {
-                editor.innerHTML = savedFiles[filename];
+                setEditorContentForFile(filename, savedFiles[filename]);
                 filenameInput.value = filename;
                 currentEditingFile = filename;
                 if (window.innerWidth < 768) closeSidebar();
@@ -556,13 +574,18 @@
                 const content = e.target.result;
                 let parsedContent = content;
 
-                if (file.name.toLowerCase().endsWith('.md')) {
+                const lowerName = file.name.toLowerCase();
+                if (lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
                     parsedContent = marked.parse(content);
-                } else if (!file.name.toLowerCase().endsWith('.html')) {
+                    editor.innerHTML = parsedContent;
+                } else if (isHtmlSourceFile(file.name)) {
+                    // 반드시 textContent로 넣어 HTML 태그/스크립트가 렌더링되거나 실행되지 않게 합니다.
+                    editor.textContent = content;
+                } else {
                     parsedContent = content.replace(/\n/g, '<br>');
+                    editor.innerHTML = parsedContent;
                 }
 
-                editor.innerHTML = parsedContent;
                 filenameInput.value = file.name;
                 currentEditingFile = null;
                 persistCurrentFile(file.name);
@@ -669,7 +692,7 @@
         function exportFile() {
             let filename = filenameInput.value.trim() || 'untitled.txt';
             const lowerName = filename.toLowerCase();
-            let contentToSave = editor.innerHTML;
+            let contentToSave = isHtmlSourceFile(filename) ? editor.innerText : editor.innerHTML;
             let mimeType = 'text/plain;charset=utf-8';
 
             if (lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
