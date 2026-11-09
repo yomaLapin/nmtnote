@@ -141,7 +141,7 @@
 
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-010)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-011)</span>
         </div>
     </aside>
 
@@ -964,8 +964,22 @@
             });
         }
 
-        // --- 5. iOS 한글 Tab 조합 버그 방지 및 사이드바 ---
+        // --- 5. iOS 한글 IME 조합 보호 및 사이드바 ---
+        // iOS 외장 키보드에서 한글 조합 중 Tab이 들어오면 브라우저/IME의
+        // 입력 처리를 가로채지 않도록 조합 상태를 별도로 추적합니다.
+        let isEditorComposing = false;
+        editor.addEventListener('compositionstart', function() {
+            isEditorComposing = true;
+        });
+        editor.addEventListener('compositionend', function() {
+            isEditorComposing = false;
+        });
+
         editor.addEventListener('keydown', function(e) {
+            // 조합 중인 키 이벤트는 preventDefault()를 포함해 앱에서 가로채지 않습니다.
+            // keyCode 229는 일부 iOS/Safari IME 이벤트의 보조 감지용입니다.
+            if (isEditorComposing || e.isComposing || e.keyCode === 229) return;
+
             const key = (e.key || '').toLowerCase();
             const hasModifier = e.ctrlKey || e.metaKey;
 
@@ -991,8 +1005,8 @@
             }
 
             if (e.key === 'Tab') {
+                // IME 조합이 아닐 때만 Tab을 공백 4칸으로 변환합니다.
                 e.preventDefault();
-                if (e.isComposing) return;
                 if (!document.execCommand('insertText', false, '    ')) {
                     const sel = window.getSelection();
                     if (sel.rangeCount) {
