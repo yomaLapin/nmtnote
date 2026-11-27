@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nmtnote-cache-202611-002-ipados-header';
+const CACHE_NAME = 'nmtnote-cache-202611-003-shortcuts';
 const urlsToCache = [
   './',
   './index.html',

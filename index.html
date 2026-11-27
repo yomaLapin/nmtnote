@@ -125,6 +125,36 @@
             #sidebar { position: relative; flex-shrink: 0; margin-left: 0; }
             #sidebar.desktop-closed { margin-left: -256px; }
         }
+
+        /* 환경설정: 기존 테마 변수 사용, CDN 클래스 생성 여부와 무관하게 동작 */
+        #settingsBtn { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        #settingsDialog { position: fixed; inset: 0; margin: auto; width: min(440px, calc(100% - 24px));
+            max-width: none; max-height: calc(100% - 24px); overflow: auto; padding: 0;
+            border: 1px solid var(--border-color); border-radius: 10px;
+            background: var(--bg-color); color: var(--text-color); box-shadow: 0 12px 36px #0005; }
+        #settingsDialog::backdrop { background: rgba(0,0,0,.5); }
+        .nmt-settings-head, .nmt-settings-foot { display: flex; align-items: center; justify-content: space-between;
+            gap: 8px; padding: 12px 16px; background: var(--header-bg); }
+        .nmt-settings-head { border-bottom: 1px solid var(--border-color); }
+        .nmt-settings-head h2 { font-size: 1.1rem; font-weight: 700; }
+        .nmt-settings-foot { border-top: 1px solid var(--border-color); flex-wrap: wrap; }
+        .nmt-settings-body { padding: 14px 16px; }
+        .nmt-settings-body h3 { font-weight: 700; margin-bottom: 6px; }
+        .nmt-settings-note { font-size: .8rem; opacity: .8; line-height: 1.5; }
+        .nmt-shortcut-row { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px;
+            align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .nmt-shortcut-name { font-size: .9rem; font-weight: 600; }
+        .nmt-shortcut-value { display: block; font-size: .78rem; overflow-wrap: anywhere; margin-top: 3px; }
+        .nmt-shortcut-actions { display: flex; align-items: center; gap: 6px; }
+        .nmt-settings-button { color: inherit; border: 1px solid var(--border-color); border-radius: 5px;
+            padding: 7px 9px; font-size: .8rem; background: transparent; white-space: nowrap; }
+        .nmt-settings-button:hover { background: var(--hover-bg); }
+        .nmt-settings-button[aria-pressed="true"] { border-color: #3b82f6; box-shadow: 0 0 0 1px #3b82f6; }
+        .nmt-settings-button:focus-visible, #settingsBtn:focus-visible { outline: 2px solid #3b82f6; outline-offset: 2px; }
+        #shortcutStatus { min-height: 2.7em; margin-top: 10px; font-size: .8rem; overflow-wrap: anywhere; }
+        #shortcutStatus[data-error="true"] { color: #f87171; }
+        body.light-theme #shortcutStatus[data-error="true"] { color: #b91c1c; }
+        @media (max-width: 330px) { .nmt-shortcut-row { grid-template-columns: 1fr; } }
     </style>
 <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.left-0{left:0px}.top-0{top:0px}.top-full{top:100%}.z-10{z-index:10}.z-20{z-index:20}.z-50{z-index:50}.mx-0\.5{margin-left:0.125rem;margin-right:0.125rem}.mx-4{margin-left:1rem;margin-right:1rem}.mb-1{margin-bottom:0.25rem}.mb-2{margin-bottom:0.5rem}.ml-2{margin-left:0.5rem}.mr-1{margin-right:0.25rem}.mr-2{margin-right:0.5rem}.mt-1{margin-top:0.25rem}.mt-10{margin-top:2.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.hidden{display:none}.h-screen{height:100vh}.h-4{height:1rem}.h-full{height:100%}.min-h-0{min-height:0px}.w-full{width:100%}.w-32{width:8rem}.w-px{width:1px}.min-w-0{min-width:0px}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.scale-95{--tw-scale-x:.95;--tw-scale-y:.95;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.transform{transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-pointer{cursor:pointer}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-y-auto{overflow-y:auto}.rounded{border-radius:0.25rem}.rounded-lg{border-radius:0.5rem}.rounded-md{border-radius:0.375rem}.rounded-b-lg{border-bottom-right-radius:0.5rem;border-bottom-left-radius:0.5rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-none{border-style:none}.border-blue-500{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.border-gray-200{--tw-border-opacity:1;border-color:rgb(229 231 235 / var(--tw-border-opacity, 1))}.border-gray-300{--tw-border-opacity:1;border-color:rgb(209 213 219 / var(--tw-border-opacity, 1))}.border-red-500{--tw-border-opacity:1;border-color:rgb(239 68 68 / var(--tw-border-opacity, 1))}.bg-black\/40{background-color:rgb(0 0 0 / 0.4)}.bg-black\/50{background-color:rgb(0 0 0 / 0.5)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-gray-50{--tw-bg-opacity:1;background-color:rgb(249 250 251 / var(--tw-bg-opacity, 1))}.bg-gray-500{--tw-bg-opacity:1;background-color:rgb(107 114 128 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-opacity-50{--tw-bg-opacity:0.5}.p-1{padding:0.25rem}.p-2{padding:0.5rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1{padding-left:0.25rem;padding-right:0.25rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.font-sans{font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.font-serif{font-family:ui-serif, Georgia, Cambria, "Times New Roman", Times, serif}.text-2xl{font-size:1.5rem;line-height:2rem}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.font-bold{font-weight:700}.font-medium{font-weight:500}.uppercase{text-transform:uppercase}.italic{font-style:italic}.leading-relaxed{line-height:1.625}.tracking-wide{letter-spacing:0.025em}.text-blue-400{--tw-text-opacity:1;color:rgb(96 165 250 / var(--tw-text-opacity, 1))}.text-blue-500{--tw-text-opacity:1;color:rgb(59 130 246 / var(--tw-text-opacity, 1))}.text-current{color:currentColor}.text-gray-600{--tw-text-opacity:1;color:rgb(75 85 99 / var(--tw-text-opacity, 1))}.text-gray-700{--tw-text-opacity:1;color:rgb(55 65 81 / var(--tw-text-opacity, 1))}.text-gray-800{--tw-text-opacity:1;color:rgb(31 41 55 / var(--tw-text-opacity, 1))}.text-red-400{--tw-text-opacity:1;color:rgb(248 113 113 / var(--tw-text-opacity, 1))}.text-red-500{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.line-through{-webkit-text-decoration-line:line-through;text-decoration-line:line-through}.placeholder-gray-400::placeholder{--tw-placeholder-opacity:1;color:rgb(156 163 175 / var(--tw-placeholder-opacity, 1))}.opacity-0{opacity:0}.opacity-40{opacity:0.4}.opacity-50{opacity:0.5}.opacity-60{opacity:0.6}.opacity-70{opacity:0.7}.shadow-lg{--tw-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-transform{transition-property:transform;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.focus-within\:border-blue-500:focus-within{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}.focus-within\:ring-1:focus-within{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.focus-within\:ring-blue-500:focus-within{--tw-ring-opacity:1;--tw-ring-color:rgb(59 130 246 / var(--tw-ring-opacity, 1))}.hover\:bg-blue-600:hover{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-gray-100:hover{--tw-bg-opacity:1;background-color:rgb(243 244 246 / var(--tw-bg-opacity, 1))}.hover\:bg-red-500:hover{--tw-bg-opacity:1;background-color:rgb(239 68 68 / var(--tw-bg-opacity, 1))}.hover\:text-red-500:hover{--tw-text-opacity:1;color:rgb(239 68 68 / var(--tw-text-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.hover\:opacity-100:hover{opacity:1}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 768px){.md\:hidden{display:none}.md\:flex-row{flex-direction:row}.md\:flex-nowrap{flex-wrap:nowrap}.md\:gap-2{gap:0.5rem}.md\:p-3{padding:0.75rem}.md\:p-6{padding:1.5rem}.md\:px-3{padding-left:0.75rem;padding-right:0.75rem}.md\:text-base{font-size:1rem;line-height:1.5rem}.md\:text-sm{font-size:0.875rem;line-height:1.25rem}.md\:shadow-none{--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}}</style></head>
 <body class="theme-bg font-sans h-screen w-full overflow-hidden flex flex-col md:flex-row">
@@ -139,6 +169,12 @@
                 <i class="ph ph-files text-xl theme-icon"></i> Files
             </h2>
             <div class="flex items-center gap-3">
+                <button id="settingsBtn" type="button" class="text-current opacity-70 hover:opacity-100 p-1" onclick="openSettings()" title="환경설정" aria-label="환경설정" aria-haspopup="dialog">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/>
+                        <path d="m10 2.8-.5 2.3-1.8.8-2-1.3-2.1 2.1 1.3 2-.8 1.8-2.3.5v3l2.3.5.8 1.8-1.3 2 2.1 2.1 2-1.3 1.8.8.5 2.3h3l.5-2.3 1.8-.8 2 1.3 2.1-2.1-1.3-2 .8-1.8 2.3-.5v-3l-2.3-.5-.8-1.8 1.3-2-2.1-2.1-2 1.3-1.8-.8-.5-2.3Z" transform="translate(.5 -.3)"/>
+                    </svg>
+                </button>
                 <div class="flex gap-2">
                     <div class="theme-btn theme-light-btn" onclick="setTheme('light')" title="라이트 테마"></div>
                     <div class="theme-btn theme-dark-btn" onclick="setTheme('dark')" title="다크 테마"></div>
@@ -157,7 +193,7 @@
 
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-002)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-003)</span>
         </div>
     </aside>
 
@@ -182,7 +218,7 @@
                     <button onclick="newFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">new</button>
                     <input type="file" id="fileInput" class="hidden" onchange="importFile(event)">
                     <button onclick="document.getElementById('fileInput').click()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">load</button>
-                    <button onclick="saveToLocalStorage()" class="px-2 md:px-3 py-1.5 border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide">save</button>
+                    <button id="saveBtn" onclick="saveToLocalStorage()" class="px-2 md:px-3 py-1.5 border border-blue-500 text-blue-500 hover:bg-blue-600 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide">save</button>
                     <button onclick="exportFile()" class="px-2 md:px-3 py-1.5 border theme-border rounded shadow-sm theme-hover transition-colors font-bold uppercase text-xs md:text-sm tracking-wide text-current">down</button>
                     <!-- 🌟 PDF 추출 버튼 추가 -->
                     <button onclick="exportPDF()" class="px-2 md:px-3 py-1.5 border border-red-500 text-red-500 hover:bg-red-500 hover:text-white rounded shadow-sm transition-colors font-bold uppercase text-xs md:text-sm tracking-wide" title="PDF로 추출">PDF</button>
@@ -208,7 +244,7 @@
                 <!-- 2,3,4) 굵게, 기울임, 삭선 -->
                 <button onclick="execCmd('bold')" class="px-2.5 py-1 border theme-border rounded theme-hover font-bold" title="굵게">B</button>
                 <button onclick="execCmd('italic')" class="px-2.5 py-1 border theme-border rounded theme-hover italic font-serif" title="기울임체">I</button>
-                <button onclick="execCmd('strikeThrough')" class="px-2.5 py-1 border theme-border rounded theme-hover line-through" title="취소선">S</button>
+                <button id="strikeBtn" onclick="execCmd('strikeThrough')" class="px-2.5 py-1 border theme-border rounded theme-hover line-through" title="취소선">S</button>
 
                 <div class="w-px h-4 bg-gray-500 opacity-40 mx-0.5"></div>
 
@@ -232,10 +268,10 @@
                 <button onclick="execCmd('removeFormat')" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover text-red-400 hover:text-red-500 flex items-center justify-center" title="서식 지우기">
                     <i class="ph ph-eraser text-base"></i>
                 </button>
-                <button onclick="undoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="실행 취소 (Ctrl/Cmd + Z)" aria-label="Undo">
+                <button id="undoBtn" onclick="undoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="실행 취소 (Ctrl/Cmd + Z)" aria-label="Undo">
                     <i class="ph ph-arrow-counter-clockwise text-base"></i>
                 </button>
-                <button onclick="redoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="다시 실행 (Windows: Ctrl + Y / iOS: Cmd + Shift + Z)" aria-label="Redo">
+                <button id="redoBtn" onclick="redoEditor()" onmousedown="event.preventDefault()" class="px-2.5 py-1 border theme-border rounded theme-hover flex items-center justify-center" title="다시 실행 (Windows: Ctrl + Y / iOS: Cmd + Shift + Z)" aria-label="Redo">
                     <i class="ph ph-arrow-clockwise text-base"></i>
                 </button>
             </div>
@@ -246,6 +282,25 @@
             <div id="editor" contenteditable="true" class="w-full h-full p-4 md:p-6 font-mono text-sm md:text-base leading-relaxed overflow-y-auto outline-none" spellcheck="false"><br></div>
         </div>
     </main>
+
+    <!-- 환경설정: 향후 다른 설정 항목을 추가할 수 있는 독립 모달 -->
+    <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+        <div class="nmt-settings-head">
+            <h2 id="settingsTitle">환경설정</h2>
+            <button type="button" class="nmt-settings-button" onclick="closeSettings()" aria-label="환경설정 닫기" autofocus>닫기</button>
+        </div>
+        <section class="nmt-settings-body" aria-labelledby="shortcutsTitle">
+            <h3 id="shortcutsTitle">키보드 단축키</h3>
+            <p class="nmt-settings-note">변경을 누른 뒤 원하는 키 조합을 입력하세요. 설정은 이 브라우저에 자동 저장됩니다.</p>
+            <div id="shortcutRows"></div>
+            <p id="shortcutStatus" role="status" aria-live="polite"></p>
+            <p class="nmt-settings-note">브라우저 또는 운영체제가 먼저 처리하는 조합은 등록하거나 실행할 수 없을 수 있습니다. Tab은 기본 동작을 유지합니다.</p>
+        </section>
+        <div class="nmt-settings-foot">
+            <button type="button" class="nmt-settings-button" id="resetAllShortcuts">전체 기본값 복원</button>
+            <button type="button" class="nmt-settings-button" onclick="closeSettings()">완료</button>
+        </div>
+    </dialog>
 
     <!-- 커스텀 알림 모달 -->
     <div id="msgModal" class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center transition-opacity duration-200 text-gray-800 opacity-0 hidden">
@@ -1006,31 +1061,306 @@
         // --- 5. 키보드 단축키 및 사이드바 ---
         // Tab 키 가로채기/공백 삽입 기능은 iOS 한글 입력기와의 충돌을 피하기 위해 제거했습니다.
         // Tab 키는 브라우저 기본 동작에 맡기며, 공백은 스페이스바로 입력합니다.
-        editor.addEventListener('keydown', function(e) {
-            const key = (e.key || '').toLowerCase();
-            const hasModifier = e.ctrlKey || e.metaKey;
+        const SHORTCUT_STORAGE_KEY = 'nmtnote_shortcuts_v1';
+        const appleShortcuts = /Mac|iPad|iPhone|iPod/i.test(navigator.platform || '') ||
+            /iPad|iPhone|iPod/i.test(navigator.userAgent);
+        const primaryModifier = appleShortcuts ? 'Meta' : 'Control';
+        const shortcutActions = {
+            save: { label: '저장', button: 'saveBtn', run: runSaveShortcut },
+            undo: { label: '실행 취소', button: 'undoBtn', run: undoEditor },
+            redo: { label: '다시 실행', button: 'redoBtn', run: redoEditor },
+            strike: { label: '취소선', button: 'strikeBtn', run: () => execCmd('strikeThrough') }
+        };
+        const shortcutDefaults = {
+            save: [primaryModifier + '+KeyS'],
+            undo: [primaryModifier + '+KeyZ'],
+            redo: appleShortcuts ? ['Meta+Shift+KeyZ'] : ['Control+KeyY', 'Control+Shift+KeyZ'],
+            strike: [primaryModifier + '+Shift+KeyX']
+        };
+        const modifierOrder = ['Control', 'Alt', 'Shift', 'Meta'];
+        const specialKeys = {
+            Space: 'Space', ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→',
+            Home: 'Home', End: 'End', PageUp: 'Page Up', PageDown: 'Page Down',
+            Insert: 'Insert', Delete: 'Delete', Backspace: 'Backspace', Enter: 'Enter',
+            Minus: '-', Equal: '=', BracketLeft: '[', BracketRight: ']', Backslash: '\\',
+            Semicolon: ';', Quote: "'", Backquote: '`', Comma: ',', Period: '.', Slash: '/',
+            NumpadAdd: 'Num +', NumpadSubtract: 'Num -', NumpadMultiply: 'Num *',
+            NumpadDivide: 'Num /', NumpadDecimal: 'Num .', NumpadEnter: 'Num Enter'
+        };
+        const settingsDialog = document.getElementById('settingsDialog');
+        const shortcutStatus = document.getElementById('shortcutStatus');
+        const shortcutRows = document.getElementById('shortcutRows');
+        const shortcutRowRefs = {};
+        let recordingShortcut = null;
+        let recordedHeldCombo = null;
+        let shortcutComposing = false;
+        let shortcutSaveFocus = null;
 
-            // 취소선: Windows Ctrl+Shift+X / iOS·Mac Cmd+Shift+X
-            if (hasModifier && e.shiftKey && key === 'x') {
-                e.preventDefault();
-                execCmd('strikeThrough');
-                return;
+        function validShortcutCode(code) {
+            return /^(Key[A-Z]|Digit[0-9]|Numpad[0-9]|F(?:[1-9]|1[0-9]|2[0-4]))$/.test(code) ||
+                Object.prototype.hasOwnProperty.call(specialKeys, code);
+        }
+        function validShortcut(combo) {
+            if (typeof combo !== 'string') return false;
+            const parts = combo.split('+');
+            const code = parts.pop();
+            if (!validShortcutCode(code)) return false;
+            if (parts.join('+') !== modifierOrder.filter(mod => parts.includes(mod)).join('+')) return false;
+            // 일반 입력과 Shift 단독 문자 입력을 보호합니다. 기능키는 단독 등록 가능.
+            return parts.some(mod => mod !== 'Shift') || /^F\d+$/.test(code);
+        }
+        function keyCodeForShortcut(e) {
+            if (e.key === 'Tab' || e.key === 'Escape' || e.code === 'Tab' || e.code === 'Escape') return '';
+            if (validShortcutCode(e.code)) return e.code;
+            const key = e.key || '';
+            if (/^[a-z]$/i.test(key)) return 'Key' + key.toUpperCase();
+            if (/^[0-9]$/.test(key)) return 'Digit' + key;
+            if (validShortcutCode(key)) return key;
+            if (key === ' ') return 'Space';
+            return Object.keys(specialKeys).find(code => specialKeys[code] === key) || '';
+        }
+        function shortcutFromEvent(e) {
+            if (e.getModifierState && e.getModifierState('AltGraph')) return null;
+            const code = keyCodeForShortcut(e);
+            if (!code) return null;
+            const mods = [e.ctrlKey, e.altKey, e.shiftKey, e.metaKey];
+            const combo = [...modifierOrder.filter((mod, i) => mods[i]), code].join('+');
+            return validShortcut(combo) ? combo : null;
+        }
+        function getShortcuts(action, overrides = shortcutOverrides) {
+            return overrides[action] ? [overrides[action]] : shortcutDefaults[action];
+        }
+        function findShortcutConflict(overrides) {
+            const seen = new Map();
+            for (const action of Object.keys(shortcutActions)) {
+                for (const combo of getShortcuts(action, overrides)) {
+                    if (seen.has(combo)) return [seen.get(combo), action];
+                    seen.set(combo, action);
+                }
             }
+            return null;
+        }
+        function loadShortcutOverrides() {
+            try {
+                const raw = JSON.parse(localStorage.getItem(SHORTCUT_STORAGE_KEY) || '{}');
+                if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return {};
+                const result = {};
+                for (const action of Object.keys(shortcutActions)) {
+                    if (validShortcut(raw[action])) result[action] = raw[action];
+                }
+                return findShortcutConflict(result) ? {} : result;
+            } catch (error) { return {}; }
+        }
+        let shortcutOverrides = loadShortcutOverrides();
 
-            // 실행 취소: Ctrl+Z / Cmd+Z
-            if (hasModifier && key === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                undoEditor();
-                return;
+        function shortcutKeyLabel(code) {
+            if (/^Key[A-Z]$/.test(code)) return code.slice(3);
+            if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+            if (/^Numpad[0-9]$/.test(code)) return 'Num ' + code.slice(6);
+            return specialKeys[code] || code;
+        }
+        function shortcutLabel(combo) {
+            const parts = combo.split('+');
+            const code = parts.pop();
+            const labels = { Control: 'Ctrl', Meta: 'Cmd', Alt: appleShortcuts ? 'Option' : 'Alt', Shift: 'Shift' };
+            return [...parts.map(mod => labels[mod]), shortcutKeyLabel(code)].join(' + ');
+        }
+        function shortcutAria(combo) {
+            const parts = combo.split('+');
+            const code = parts.pop();
+            const key = shortcutKeyLabel(code);
+            return [...parts, /^Arrow/.test(code) ? code : code === 'Space' ? 'Space' : key].join('+');
+        }
+        function setShortcutStatus(message = '', error = false) {
+            shortcutStatus.textContent = message;
+            shortcutStatus.dataset.error = String(error);
+        }
+        function renderShortcuts() {
+            for (const [action, config] of Object.entries(shortcutActions)) {
+                const combos = getShortcuts(action);
+                const label = combos.map(shortcutLabel).join(' / ');
+                const btn = document.getElementById(config.button);
+                btn.title = `${config.label} (${label})`;
+                btn.setAttribute('aria-keyshortcuts', combos.map(shortcutAria).join(' '));
+                const row = shortcutRowRefs[action];
+                row.value.textContent = label;
+                row.change.textContent = recordingShortcut === action ? '입력 중…' : '변경';
+                row.change.setAttribute('aria-pressed', String(recordingShortcut === action));
             }
-
-            // 다시 실행: Windows Ctrl+Y 또는 Ctrl+Shift+Z / iOS·Mac Cmd+Shift+Z
-            if ((e.ctrlKey && key === 'y' && !e.shiftKey) || (hasModifier && e.shiftKey && key === 'z')) {
-                e.preventDefault();
-                redoEditor();
-                return;
+        }
+        function cancelShortcutRecording(message = '') {
+            recordingShortcut = null;
+            renderShortcuts();
+            setShortcutStatus(message);
+        }
+        function applyShortcutOverrides(next, message) {
+            const conflict = findShortcutConflict(next);
+            if (conflict) {
+                setShortcutStatus(`${shortcutActions[conflict[0]].label} / ${shortcutActions[conflict[1]].label}: 단축키가 중복됩니다. 다른 조합을 지정하거나 전체 기본값을 복원하세요.`, true);
+                return false;
             }
+            try { localStorage.setItem(SHORTCUT_STORAGE_KEY, JSON.stringify(next)); }
+            catch (error) {
+                setShortcutStatus('설정을 저장할 수 없습니다. 브라우저 저장 공간 또는 권한을 확인하세요.', true);
+                return false;
+            }
+            shortcutOverrides = next;
+            cancelShortcutRecording(message);
+            return true;
+        }
+        for (const [action, config] of Object.entries(shortcutActions)) {
+            const row = document.createElement('div');
+            row.className = 'nmt-shortcut-row';
+            const info = document.createElement('div');
+            const name = document.createElement('div');
+            name.className = 'nmt-shortcut-name';
+            name.textContent = config.label;
+            const value = document.createElement('span');
+            value.className = 'nmt-shortcut-value';
+            info.append(name, value);
+            const actions = document.createElement('div');
+            actions.className = 'nmt-shortcut-actions';
+            const change = document.createElement('button');
+            change.type = 'button';
+            change.className = 'nmt-settings-button';
+            change.setAttribute('aria-label', config.label + ' 단축키 변경');
+            change.addEventListener('click', () => {
+                if (recordingShortcut === action) { cancelShortcutRecording('입력을 취소했습니다.'); return; }
+                recordingShortcut = action;
+                change.focus();
+                renderShortcuts();
+                setShortcutStatus(`${config.label}: 키 조합을 누르세요. Esc 또는 변경 버튼으로 취소할 수 있습니다.`);
+            });
+            change.addEventListener('blur', () => {
+                if (recordingShortcut === action) cancelShortcutRecording('입력을 취소했습니다.');
+            });
+            const reset = document.createElement('button');
+            reset.type = 'button';
+            reset.className = 'nmt-settings-button';
+            reset.textContent = '복원';
+            reset.setAttribute('aria-label', config.label + ' 기본값 복원');
+            reset.addEventListener('click', () => {
+                cancelShortcutRecording();
+                const next = { ...shortcutOverrides };
+                delete next[action];
+                applyShortcutOverrides(next, config.label + ' 기본값을 복원했습니다.');
+            });
+            actions.append(change, reset);
+            row.append(info, actions);
+            shortcutRows.appendChild(row);
+            shortcutRowRefs[action] = { value, change };
+        }
+        document.getElementById('resetAllShortcuts').addEventListener('click', () => {
+            cancelShortcutRecording();
+            applyShortcutOverrides({}, '모든 단축키를 기본값으로 복원했습니다.');
         });
+        renderShortcuts();
+        function openSettings() {
+            if (settingsDialog.open) return;
+            cancelShortcutRecording();
+            settingsDialog.showModal();
+        }
+        function closeSettings() {
+            if (settingsDialog.open) settingsDialog.close();
+        }
+        settingsDialog.addEventListener('close', () => {
+            recordedHeldCombo = null;
+            cancelShortcutRecording();
+        });
+
+        // 기존 SAVE 함수와 메시지 모달을 그대로 사용하며 마지막 알림 종료 뒤 포커스를 복원합니다.
+        function runSaveShortcut() {
+            const active = document.activeElement;
+            const snapshot = { active };
+            if (active === filenameInput) {
+                snapshot.start = active.selectionStart;
+                snapshot.end = active.selectionEnd;
+                snapshot.direction = active.selectionDirection;
+            } else {
+                const selection = window.getSelection();
+                if (selection.rangeCount && editor.contains(selection.anchorNode) && editor.contains(selection.focusNode)) {
+                    snapshot.anchor = selection.anchorNode;
+                    snapshot.anchorOffset = selection.anchorOffset;
+                    snapshot.focus = selection.focusNode;
+                    snapshot.focusOffset = selection.focusOffset;
+                }
+                snapshot.scrollTop = editor.scrollTop;
+                snapshot.scrollLeft = editor.scrollLeft;
+            }
+            shortcutSaveFocus = snapshot;
+            try { saveToLocalStorage(); }
+            catch (error) { shortcutSaveFocus = null; throw error; }
+        }
+        function restoreShortcutSaveFocus() {
+            const snapshot = shortcutSaveFocus;
+            shortcutSaveFocus = null;
+            if (!snapshot || !snapshot.active.isConnected || settingsDialog.open) return;
+            // 사용자가 이미 다른 컨트롤로 이동했다면 포커스를 강제로 빼앗지 않습니다.
+            const active = document.activeElement;
+            if (active !== document.body && active !== snapshot.active && !document.getElementById('msgModal').contains(active)) return;
+            snapshot.active.focus({ preventScroll: true });
+            if (snapshot.active === filenameInput) {
+                const length = filenameInput.value.length;
+                filenameInput.setSelectionRange(Math.min(snapshot.start, length), Math.min(snapshot.end, length), snapshot.direction);
+            } else {
+                if (snapshot.anchor && editor.contains(snapshot.anchor) && editor.contains(snapshot.focus)) {
+                    try { window.getSelection().setBaseAndExtent(snapshot.anchor, snapshot.anchorOffset, snapshot.focus, snapshot.focusOffset); }
+                    catch (error) { /* 편집 내용이 바뀌어 기존 범위가 무효인 경우 포커스만 유지 */ }
+                }
+                editor.scrollTop = snapshot.scrollTop;
+                editor.scrollLeft = snapshot.scrollLeft;
+            }
+        }
+
+        document.addEventListener('compositionstart', () => { shortcutComposing = true; }, true);
+        document.addEventListener('compositionend', () => { shortcutComposing = false; }, true);
+        window.addEventListener('blur', () => { shortcutComposing = false; recordedHeldCombo = null; });
+        document.addEventListener('keyup', () => { recordedHeldCombo = null; }, true);
+        // 브라우저의 Undo/Redo 기본 조합 중 사용자 지정으로 해제된 조합만 편집기에서 차단합니다.
+        const nativeHistoryShortcuts = {
+            undo: ['Control+KeyZ', 'Meta+KeyZ'],
+            redo: ['Control+KeyY', 'Control+Shift+KeyZ', 'Meta+Shift+KeyZ']
+        };
+        function consumeShortcut(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        document.addEventListener('keydown', (e) => {
+            if (e.isComposing || shortcutComposing || e.keyCode === 229 || e.key === 'Process' || e.key === 'Dead' ||
+                (e.getModifierState && e.getModifierState('AltGraph'))) return;
+            // Tab은 등록 및 실행 대상에서 제외합니다.
+            if (e.key === 'Tab' || e.code === 'Tab') return;
+            const combo = shortcutFromEvent(e);
+            if (settingsDialog.open) {
+                if (recordingShortcut) {
+                    if (e.key === 'Escape') { consumeShortcut(e); cancelShortcutRecording('입력을 취소했습니다.'); return; }
+                    if (['Control', 'Alt', 'Shift', 'Meta', 'AltGraph'].includes(e.key)) return;
+                    consumeShortcut(e);
+                    if (e.repeat) return;
+                    if (!combo) { setShortcutStatus('Ctrl, Alt/Option, Cmd 중 하나를 포함하거나 기능키(F1~F24)를 사용하세요. Tab은 등록할 수 없습니다.', true); return; }
+                    recordedHeldCombo = combo;
+                    applyShortcutOverrides({ ...shortcutOverrides, [recordingShortcut]: combo }, '단축키를 저장했습니다.');
+                } else if (e.repeat && combo && combo === recordedHeldCombo) consumeShortcut(e);
+                return;
+            }
+            if (!combo || e.defaultPrevented) return;
+            const action = Object.keys(shortcutActions).find(id => getShortcuts(id).includes(combo));
+            const modalOpen = !document.getElementById('msgModal').classList.contains('hidden');
+            if (modalOpen) {
+                if (action && (shortcutSaveFocus || editor.contains(e.target) || e.target === filenameInput)) consumeShortcut(e);
+                return;
+            }
+            const inEditor = editor.contains(e.target);
+            const inFilename = e.target === filenameInput;
+            if (action && (inEditor || (action === 'save' && inFilename))) {
+                consumeShortcut(e);
+                if (e.repeat && (action === 'save' || action === 'strike')) return;
+                shortcutActions[action].run();
+                return;
+            }
+            if (inEditor && !action && Object.keys(nativeHistoryShortcuts).some(id =>
+                shortcutOverrides[id] && nativeHistoryShortcuts[id].includes(combo))) consumeShortcut(e);
+        }, true);
 
         function toggleSidebar() {
             if (window.innerWidth < 768) {
@@ -1061,6 +1391,7 @@
             else { cancelBtn.classList.add('hidden'); msgConfirmCallback = null; }
             const modal = document.getElementById('msgModal');
             modal.classList.remove('hidden');
+            if (shortcutSaveFocus) document.getElementById('msgOkBtn').focus({ preventScroll: true });
             setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('msgModalContent').classList.remove('scale-95'); }, 10);
         }
         function closeMsg() {
@@ -1072,6 +1403,7 @@
             msgCloseTimer = setTimeout(() => {
                 modal.classList.add('hidden');
                 msgCloseTimer = null;
+                restoreShortcutSaveFocus();
             }, 200);
         }
         function confirmMsg() {
