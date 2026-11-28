@@ -1,10 +1,12 @@
-const CACHE_NAME = 'nmtnote-cache-202611-004-shortcuts';
+const CACHE_NAME = 'nmtnote-cache-202611-005-markdown';
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './vendor/marked.js',
+  new Request('https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.js', {mode: 'cors', credentials: 'omit'})
 ];
 
 // 1. 설치 과정 (초기 캐싱)

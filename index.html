@@ -21,9 +21,9 @@
     <script src="https://unpkg.com/@phosphor-icons/web" crossorigin="anonymous"></script><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/thin/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/light/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/bold/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/fill/style.css"><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/duotone/style.css">
     
     <!-- Markdown 파싱 라이브러리 추가 -->
-    <script src="https://unpkg.com/marked/marked.min.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/turndown/dist/turndown.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/turndown-plugin-gfm/dist/turndown-plugin-gfm.js" crossorigin="anonymous"></script>
+    <script src="./vendor/marked.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.js" crossorigin="anonymous"></script>
+    <!-- GFM tables use the existing custom conversion rule, not the unused GFM plugin. -->
 
     <!-- 🌟 PDF 추출 라이브러리 추가 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" crossorigin="anonymous"></script>
@@ -193,7 +193,7 @@
 
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-004)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-005)</span>
         </div>
     </aside>
 
@@ -363,7 +363,7 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const STORAGE_PREFIX = 'nmtnote_file_';
-        let savedFiles = {};
+        let savedFiles = Object.create(null);
         let currentEditingFile = null;
 
         // --- 2. WYSIWYG 서식 명령 ---
@@ -528,7 +528,7 @@
 
         // --- 4. 파일 관리 및 변환 로직 ---
         function loadFilesFromStorage() {
-            savedFiles = {};
+            savedFiles = Object.create(null);
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith(STORAGE_PREFIX)) {
@@ -636,33 +636,91 @@
             });
         }
 
-        function importFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const content = e.target.result;
-                let parsedContent = content;
-
-                const lowerName = file.name.toLowerCase();
-                if (lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
-                    parsedContent = marked.parse(content);
-                    editor.innerHTML = parsedContent;
-                } else if (isHtmlSourceFile(file.name)) {
-                    // 반드시 textContent로 넣어 HTML 태그/스크립트가 렌더링되거나 실행되지 않게 합니다.
-                    editor.textContent = content;
-                } else {
-                    parsedContent = content.replace(/\n/g, '<br>');
-                    editor.innerHTML = parsedContent;
+        // Parse in an inert template; rebuild only permitted formatting and attributes.
+        function sanitizeImportedMarkdown(html) {
+            const template = document.createElement('template');
+            template.innerHTML = html;
+            const allowed = new Set('h1 h2 h3 h4 h5 h6 p div span br hr strong b em i s strike del u code pre blockquote ul ol li a table thead tbody tfoot tr th td sub sup img'.split(' '));
+            const discard = new Set('script style iframe object embed svg math template form input button textarea select link meta base audio video'.split(' '));
+            const output = document.createElement('div');
+            function copy(node, parent) {
+                if (node.nodeType === 3) { parent.appendChild(document.createTextNode(node.data)); return; }
+                if (node.nodeType !== 1) return;
+                const tag = node.localName.toLowerCase();
+                if (node.namespaceURI !== 'http://www.w3.org/1999/xhtml' || discard.has(tag)) return;
+                if (!allowed.has(tag)) { Array.from(node.childNodes).forEach(n => copy(n, parent)); return; }
+                const el = document.createElement(tag);
+                for (const attr of ['title', 'alt']) if (node.hasAttribute(attr)) el.setAttribute(attr, node.getAttribute(attr));
+                for (const attr of ['href', 'src']) {
+                    if ((tag !== 'a' || attr !== 'href') && (tag !== 'img' || attr !== 'src')) continue;
+                    const value = node.getAttribute(attr);
+                    if (!value) continue;
+                    try {
+                        const url = new URL(value, document.baseURI);
+                        if (['http:', 'https:'].includes(url.protocol) || (tag === 'a' && url.protocol === 'mailto:')) el.setAttribute(attr, value);
+                    } catch (_) {}
                 }
+                if (tag === 'ol' && /^\d+$/.test(node.getAttribute('start') || '')) el.setAttribute('start', node.getAttribute('start'));
+                if (['th','td'].includes(tag) && /^(left|center|right)$/.test(node.getAttribute('align') || '')) el.setAttribute('align', node.getAttribute('align'));
+                Array.from(node.childNodes).forEach(n => copy(n, el));
+                parent.appendChild(el);
+            }
+            Array.from(template.content.childNodes).forEach(n => copy(n, output));
+            return output.innerHTML;
+        }
 
-                filenameInput.value = file.name;
-                currentEditingFile = null;
-                persistCurrentFile(file.name);
-                event.target.value = '';
+        let importGeneration = 0;
+        function importFile(event) {
+            const input = event.target;
+            const file = input.files && input.files[0];
+            input.value = '';
+            if (!file) return;
+            const generation = ++importGeneration;
+            const active = () => generation === importGeneration;
+            const fail = (message, error) => {
+                if (!active()) return;
+                console.error('NMTnote import:', message, error);
+                showMsg('불러오기 실패', message);
             };
-            reader.readAsText(file);
+            try {
+                const reader = new FileReader();
+                reader.onerror = () => fail('파일 읽기에 실패했습니다.', reader.error);
+                reader.onabort = () => fail('파일 읽기가 중단되었습니다.', reader.error);
+                reader.onload = async () => {
+                    if (!active()) return;
+                    const content = reader.result;
+                    const name = file.name;
+                    let stored;
+                    if (/\.(md|markdown)$/i.test(name)) {
+                        if (!window.marked || typeof window.marked.parse !== 'function') {
+                            fail('Markdown 라이브러리를 불러오지 못했습니다. 앱을 업데이트하거나 다시 실행해 주세요.', new Error('Marked unavailable'));
+                            return;
+                        }
+                        try {
+                            const parsed = await window.marked.parse(content);
+                            if (typeof parsed !== 'string') throw new Error('Invalid parser output');
+                            stored = sanitizeImportedMarkdown(parsed);
+                        } catch (error) { fail('Markdown 변환에 실패했습니다.', error); return; }
+                    } else if (isHtmlSourceFile(name)) {
+                        stored = content;
+                    } else {
+                        const plain = document.createElement('div');
+                        plain.textContent = content;
+                        stored = plain.innerHTML.replace(/\r\n|\r|\n/g, '<br>');
+                    }
+                    if (!active()) return;
+                    // localStorage.setItem is atomic: do not replace the editor on failure.
+                    try { localStorage.setItem(STORAGE_PREFIX + name, stored); }
+                    catch (error) { fail('브라우저 내부 저장에 실패했습니다. 저장 공간 또는 권한을 확인해 주세요.', error); return; }
+                    setEditorContentForFile(name, stored);
+                    filenameInput.value = name;
+                    currentEditingFile = name;
+                    savedFiles[name] = stored;
+                    renderFileList();
+                    showMsg('저장 완료', `[${name}] 브라우저에 저장되었습니다.`);
+                };
+                reader.readAsText(file, 'UTF-8');
+            } catch (error) { fail('파일 읽기에 실패했습니다.', error); }
         }
 
         // Markdown 표 셀과 본문에 동일한 inline 서식 규칙을 적용합니다.
@@ -684,6 +742,10 @@
             service.addRule('nmtItalic', {
                 filter: ['em', 'i'],
                 replacement: (content) => content ? `*${content}*` : ''
+            });
+            service.addRule('nmtUnderline', {
+                filter: 'u',
+                replacement: content => content ? `<u>${content}</u>` : ''
             });
             service.addRule('nmtStrikethrough', {
                 filter: ['del', 's', 'strike'],
@@ -767,12 +829,23 @@
             let mimeType = 'text/plain;charset=utf-8';
 
             if (lowerName.endsWith('.md') || lowerName.endsWith('.markdown')) {
+                if (typeof window.TurndownService !== 'function') {
+                    showMsg('내보내기 실패', 'Markdown 내보내기 라이브러리를 불러오지 못했습니다.');
+                    console.error('NMTnote: Turndown unavailable');
+                    return;
+                }
+                try {
                 const turndownService = createMarkdownService();
                 contentToSave = turndownService.turndown(editor.innerHTML)
                     .replace(/\r\n/g, '\n')
                     .replace(/\n{3,}/g, '\n\n')
                     .trim() + '\n';
                 mimeType = 'text/markdown;charset=utf-8';
+                } catch (error) {
+                    console.error('NMTnote Markdown export:', error);
+                    showMsg('내보내기 실패', 'Markdown 변환에 실패했습니다.');
+                    return;
+                }
             } else if (lowerName.endsWith('.html') || lowerName.endsWith('.htm')) {
                 mimeType = 'text/html;charset=utf-8';
             } else {
@@ -1047,13 +1120,16 @@
                 else if(filename.endsWith('.py')) icon = 'ph-file-code';
                 
                 item.innerHTML = `
-                    <div class="flex items-center gap-2 overflow-hidden flex-1" onclick="openFile('${filename}')">
+                    <div class="flex items-center gap-2 overflow-hidden flex-1" >
                         <i class="ph ${icon} theme-icon text-lg flex-shrink-0"></i>
-                        <span class="text-sm truncate font-medium text-current">${filename}</span>
+                        <span class="text-sm truncate font-medium text-current"></span>
                     </div>
-                    <button class="p-2 transition-colors hover:text-red-500" style="color: var(--text-color); opacity: 0.7;" onclick="deleteFile('${filename}', event)">
+                    <button class="p-2 transition-colors hover:text-red-500" style="color: var(--text-color); opacity: 0.7;" >
                         <i class="ph ph-trash text-lg"></i>
                     </button>`;
+                item.querySelector('span').textContent = filename;
+                item.firstElementChild.addEventListener('click', () => openFile(filename));
+                item.querySelector('button').addEventListener('click', event => deleteFile(filename, event));
                 fileListContainer.appendChild(item);
             });
         }
