@@ -193,7 +193,7 @@
 
         <div class="p-4 border-t theme-border text-center theme-sidebar shrink-0">
             <strong class="block text-base mb-1">NMT Note</strong>
-            <span class="text-xs opacity-60">yomaLapin(202611-003)</span>
+            <span class="text-xs opacity-60">yomaLapin(202611-004)</span>
         </div>
     </aside>
 
@@ -563,7 +563,7 @@
         function saveToLocalStorage() {
             let filename = filenameInput.value.trim() || 'untitled.txt';
 
-            if (hasRichFormatting()) {
+            if (hasRichFormatting() && !/\.(md|markdown)$/i.test(filename)) {
                 showMsg(
                     'Markdown 저장 확인',
                     '서식이 사용되었습니다. 서식을 포함한 MarkDown으로 저장합니까?',

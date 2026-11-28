@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nmtnote-cache-202611-003-shortcuts';
+const CACHE_NAME = 'nmtnote-cache-202611-004-shortcuts';
 const urlsToCache = [
   './',
   './index.html',
